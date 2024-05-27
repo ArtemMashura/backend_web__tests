@@ -1,9 +1,20 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { UserService } from './user.service';
+import { Request } from 'express';
+import { TokenService } from 'src/services/token/token.service';
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService) {}
+    constructor(
+        private readonly userService: UserService,
+        private readonly tokenService: TokenService
+    ) {}
 
-    // TODO
+    @Get('my-rooms')
+    async myRooms(@Req() req: Request) {
+        const token = req.headers.authorization.split(' ')[1];
+        const payload = this.tokenService.verifyToken(token, 'access');
+
+        return this.userService.findChatsByUser(payload.uuid);
+    }
 }

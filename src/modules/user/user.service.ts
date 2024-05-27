@@ -47,4 +47,11 @@ export class UserService {
             throw new BadRequestException('User not found');
         }
     }
+
+    async findChatsByUser(uuid: string) {
+        return await this.userRepository.findOneOrFail({
+            where: { uuid },
+            relations: ['chats'],
+        });
+    }
 }

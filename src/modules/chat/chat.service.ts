@@ -1,25 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRoomDto } from './dto/create-room.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RoomEntity } from './entities/room.dto';
+import { WsException } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
-import { UserService } from '../user/user.service';
 import { UserEntity } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
+import { CreateRoomDto } from './dto/create-room.dto';
+import { WSJoinDto } from './dto/join.dto';
+import { RoomEntity } from './entities/room.dto';
+import { WSNewMessageDto } from './dto/create-message.dto';
+import { MessageEntity } from './entities/message.dto';
 
 @Injectable()
 export class ChatService {
     constructor(
         @InjectRepository(RoomEntity)
         private roomRepository: Repository<RoomEntity>,
+        @InjectRepository(MessageEntity)
+        private messageRepository: Repository<MessageEntity>,
         private readonly userService: UserService
     ) {}
 
+    async createMessage(newMessage: WSNewMessageDto) {
+        // find room
+        const room = await this.findOneByUid(newMessage.toRoomUid);
+        console.log('Room => ', room);
+        if (!room) throw new WsException('Room not found');
+
+        // find user
+        const user = await this.userService.findOneByUid(newMessage.fromUid);
+        // check if user is in room
+        const isUserInRoom = room.users.some((u) => u.uuid === user.uuid);
+        if (!isUserInRoom)
+            throw new WsException('User is not a member of the room');
+
+        console.log('User => ', user);
+        // save message
+        const message = await this.messageRepository.save({
+            ...newMessage,
+            date: new Date(),
+        });
+        console.log('message => ', message);
+        return message;
+    }
+
     async createRoom(newRoom: CreateRoomDto, ownerUid: string) {
         const owner: UserEntity = await this.userService.findOneByUid(ownerUid);
-        const users: Array<UserEntity> = [];
-        newRoom.users.forEach(async (userUid) => {
-            users.push(await this.userService.findOneByUid(userUid));
+        const usersPromises = newRoom.users.map((userUid) => {
+            return this.userService.findOneByUid(userUid);
         });
+        const users: Array<UserEntity> = await Promise.all(usersPromises);
 
         return await this.roomRepository.save({
             name: newRoom.name,
@@ -27,4 +56,31 @@ export class ChatService {
             users,
         });
     }
+
+    async joinRoom(joinDto: WSJoinDto) {
+        const room = await this.roomRepository.findOneBy({
+            uuid: joinDto.roomUid,
+        });
+        if (!room) throw new WsException('Room not found');
+        const user = await this.userService.findOneByUid(joinDto.userUid);
+        const isUserInRoom = room.users.some((u) => u.uuid === user.uuid);
+        if (isUserInRoom) throw new WsException('User already in room');
+
+        room.users.push(user);
+        await this.roomRepository.save(room);
+
+        return user;
+    }
+
+    async findOneByUid(uuid: string) {
+        return await this.roomRepository.findOneOrFail({
+            where: { uuid },
+            relations: ['users'],
+        });
+    }
+
+    // async newMessage(newMessage: CreateMessageDto, userUuid: string) {
+    //     const fromUser = await this.userService.findOneByUid(userUuid);
+
+    // }
 }

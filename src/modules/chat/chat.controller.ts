@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
+import { TokenService } from 'src/services/token/token.service';
 import { ChatService } from './chat.service';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { TokenService } from 'src/services/token/token.service';
-import { Request } from 'express';
 
 @Controller('chat')
 export class ChatController {
@@ -18,4 +18,18 @@ export class ChatController {
 
         return this.chatService.createRoom(roomDto, user.uuid);
     }
+
+    @Get(':room_uid')
+    async getRoomByUid(@Param('room_uid') roomUid: string) {
+        return await this.chatService.findOneByUid(roomUid);
+    }
+
+    // @Post('new-message')
+    // // eslint-disable-next-line prettier/prettier
+    // async newMessage(@Body() newMessage: CreateMessageDto, @Req() req: Request) {
+    //     const token = req.headers.authorization.split(' ')[1];
+    //     const user = this.tokenService.verifyToken(token, 'access');
+
+    //     return this.chatService.newMessage(newMessage, user.uuid);
+    // }
 }
