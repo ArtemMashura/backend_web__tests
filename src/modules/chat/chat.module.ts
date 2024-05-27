@@ -9,6 +9,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
     imports: [TypeOrmModule.forFeature([RoomEntity]), UserModule, TokenModule],
-    providers: [ChatGateway, ChatController, ChatService],
+    controllers: [ChatController],
+    providers: [ChatGateway, ChatService],
 })
 export class ChatModule {}

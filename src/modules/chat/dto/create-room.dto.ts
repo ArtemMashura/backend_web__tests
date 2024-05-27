@@ -4,6 +4,8 @@ export class CreateRoomDto {
     @IsString()
     name: string;
 
-    @IsArray({ each: true })
+    @IsArray()
+    // @ValidateNested({ each: true })
+    // @Type(() => String)
     users: Array<string>;
 }
