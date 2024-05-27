@@ -1,26 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RoomEntity } from './entities/room.dto';
+import { Repository } from 'typeorm';
+import { UserService } from '../user/user.service';
+import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class ChatService {
-    create(createChatDto: CreateChatDto) {
-        return 'This action adds a new chat';
-    }
+    constructor(
+        @InjectRepository(RoomEntity)
+        private roomRepository: Repository<RoomEntity>,
+        private readonly userService: UserService
+    ) {}
 
-    findAll() {
-        return `This action returns all chat`;
-    }
+    async createRoom(newRoom: CreateRoomDto, ownerUid: string) {
+        const owner: UserEntity = await this.userService.findOneByUid(ownerUid);
+        const users: Array<UserEntity> = [];
+        newRoom.users.forEach(async (userUid) => {
+            users.push(await this.userService.findOneByUid(userUid));
+        });
 
-    findOne(id: number) {
-        return `This action returns a #${id} chat`;
-    }
-
-    update(id: number, updateChatDto: UpdateChatDto) {
-        return `This action updates a #${id} chat`;
-    }
-
-    remove(id: number) {
-        return `This action removes a #${id} chat`;
+        return await this.roomRepository.save({
+            name: newRoom.name,
+            owner,
+            users,
+        });
     }
 }

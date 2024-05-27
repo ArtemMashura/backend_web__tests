@@ -1,107 +1,50 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Room, User } from 'src/interface/chat.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserEntity } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-    private rooms: Room[] = [];
+    constructor(
+        @InjectRepository(UserEntity)
+        private userRepository: Repository<UserEntity>
+    ) {}
 
-    public async getRooms() {
-        return this.rooms;
+    async create(createUserDto: CreateUserDto) {
+        const isUserExist = await this.userRepository.exists({
+            where: { username: createUserDto.username },
+        });
+
+        if (isUserExist) {
+            throw new BadRequestException('User already exist');
+        }
+
+        return await this.userRepository.save({
+            ...createUserDto,
+            password: await bcrypt.hash(createUserDto.password, 10),
+            chats: [],
+        });
     }
 
-    public async addRoom(roomName: string, user: User) {
-        const room = await this.getRoomIndexByName(roomName);
-        if (room !== -1) {
-            this.rooms.push({
-                name: roomName,
-                host: user,
-                users: [user],
-                roomUid: crypto.randomUUID(),
+    async findOneByUsername(username: string) {
+        try {
+            return await this.userRepository.findOneOrFail({
+                where: { username },
             });
+        } catch (e) {
+            throw new BadRequestException('User not found');
         }
     }
 
-    public async getRoomByUid(roomUid: string) {
-        return this.rooms.find((room) => room.roomUid === roomUid);
-    }
-
-    public async removeRoom(roomUid: string) {
-        const room = await this.getRoomIndexByName(roomUid);
-
-        if (room !== -1) {
-            throw new BadRequestException(
-                `Can't find room with UUID: ${roomUid}`
-            );
+    async findOneByUid(uuid: string) {
+        try {
+            return await this.userRepository.findOneOrFail({
+                where: { uuid },
+            });
+        } catch (e) {
+            throw new BadRequestException('User not found');
         }
-
-        this.rooms = this.rooms.filter((room) => room.roomUid !== roomUid);
-    }
-
-    public async getHostByRoomUid(roomUid: string) {
-        const roomIndex = await this.getRoomIndexByUid(roomUid);
-        if (roomIndex === -1) {
-            throw new BadRequestException(
-                `Can't find room with UUID: ${roomUid}`
-            );
-        }
-
-        return this.rooms[roomIndex].host;
-    }
-
-    public async addUserToRoom(roomUid: string, user: User) {
-        const roomIndex = await this.getRoomIndexByUid(roomUid);
-        if (roomIndex === -1) {
-            throw new BadRequestException(
-                `Can't find room with UUID: ${roomUid}`
-            );
-        }
-
-        this.rooms[roomIndex].users.push(user);
-        const host = await this.getHostByRoomUid(roomUid);
-        if (host.userUid === user.userUid) {
-            this.rooms[roomIndex].host.socketId = user.socketId;
-        }
-    }
-
-    public async findRoomsByUserSocketId(socketId: string) {
-        const filteredRooms = this.rooms.filter((room) => {
-            const user = room.users.find((user) => user.socketId === socketId);
-            if (user) return user;
-        });
-
-        return filteredRooms;
-    }
-
-    public async removeUserFromRoom(roomUid: string, socketId: string) {
-        const room = await this.getRoomIndexByUid(roomUid);
-        if (room === -1) {
-            throw new BadRequestException(
-                `Can't find room with UUID: ${roomUid}`
-            );
-        }
-
-        this.rooms[room].users = this.rooms[room].users.filter(
-            (user) => user.socketId !== socketId
-        );
-
-        if (this.rooms[room].users.length === 0) {
-            this.removeRoom(roomUid);
-        }
-    }
-
-    public async removeUserFromAllRooms(socketId: string) {
-        const rooms = await this.findRoomsByUserSocketId(socketId);
-
-        rooms.forEach((room) => {
-            this.removeUserFromRoom(room.roomUid, socketId);
-        });
-    }
-
-    public async getRoomIndexByName(roomName: string) {
-        return this.rooms.findIndex((room) => room.name === roomName);
-    }
-
-    public async getRoomIndexByUid(roomUid: string) {
-        return this.rooms.findIndex((room) => room.roomUid === roomUid);
     }
 }
