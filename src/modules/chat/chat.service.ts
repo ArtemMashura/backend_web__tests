@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
@@ -6,9 +6,9 @@ import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { WSJoinDto } from './dto/join.dto';
-import { RoomEntity } from './entities/room.dto';
+import { RoomEntity } from './entities/room.entity';
 import { WSNewMessageDto } from './dto/create-message.dto';
-import { MessageEntity } from './entities/message.dto';
+import { MessageEntity } from './entities/message.entity';
 
 @Injectable()
 export class ChatService {
@@ -33,13 +33,13 @@ export class ChatService {
         if (!isUserInRoom)
             throw new WsException('User is not a member of the room');
 
-        console.log('User => ', user);
         // save message
         const message = await this.messageRepository.save({
             ...newMessage,
+            to: room,
+            from: user,
             date: new Date(),
         });
-        console.log('message => ', message);
         return message;
     }
 
@@ -76,6 +76,16 @@ export class ChatService {
         return await this.roomRepository.findOneOrFail({
             where: { uuid },
             relations: ['users'],
+        });
+    }
+
+    async loadMessages(roomUId: string) {
+        const room = await this.roomRepository.findOneBy({ uuid: roomUId });
+        if (!room) throw new BadRequestException('Room not found');
+
+        return await this.messageRepository.find({
+            where: { to: { uuid: roomUId } },
+            relations: ['from'],
         });
     }
 

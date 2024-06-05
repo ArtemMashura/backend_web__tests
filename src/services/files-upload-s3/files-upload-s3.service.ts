@@ -31,4 +31,16 @@ export class FilesUploadS3Service {
                 .promise()
         ).Location;
     }
+
+    async uploadFile(filename: string, file: Buffer) {
+        return (
+            await this.s3Client
+                .upload({
+                    Bucket: this.configService.get<string>('AWS_FILE_BUCKET'),
+                    Body: file,
+                    Key: filename,
+                })
+                .promise()
+        ).Location;
+    }
 }

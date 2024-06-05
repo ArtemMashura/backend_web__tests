@@ -77,6 +77,7 @@ export class AuthController {
         return res.json({
             success: true,
             message: AuthMessage.successLogin,
+            user,
         });
     }
 

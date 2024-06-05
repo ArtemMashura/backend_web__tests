@@ -51,7 +51,7 @@ export class UserService {
     async findChatsByUser(uuid: string) {
         return await this.userRepository.findOneOrFail({
             where: { uuid },
-            relations: ['chats'],
+            relations: ['chats', 'chats.users', 'chats.owner'],
         });
     }
 }

@@ -51,6 +51,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.io.to(message.toRoomUid).emit('message', message);
     }
 
+    @SubscribeMessage('file')
+    async sendFile(@MessageBody() data: any) {
+        console.log(data);
+    }
+
     handleConnection(client: Socket) {
         this.logger.log(
             `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets.size}!`

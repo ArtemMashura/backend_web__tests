@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmAsyncConfig } from './config/typeorm.config';
 import * as Joi from 'joi';
-import { UserModule } from './modules/user/user.module';
-import { ChatModule } from './modules/chat/chat.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { typeOrmAsyncConfig } from './config/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
     imports: [

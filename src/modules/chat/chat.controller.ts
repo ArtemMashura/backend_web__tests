@@ -24,6 +24,11 @@ export class ChatController {
         return await this.chatService.findOneByUid(roomUid);
     }
 
+    @Get('load-messages/:room_uid')
+    async loadMessages(@Param('room_uid') roomUId: string) {
+        return await this.chatService.loadMessages(roomUId);
+    }
+
     // @Post('new-message')
     // // eslint-disable-next-line prettier/prettier
     // async newMessage(@Body() newMessage: CreateMessageDto, @Req() req: Request) {

@@ -4,9 +4,9 @@ import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
 import { TokenModule } from 'src/services/token/token.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RoomEntity } from './entities/room.dto';
+import { RoomEntity } from './entities/room.entity';
 import { UserModule } from '../user/user.module';
-import { MessageEntity } from './entities/message.dto';
+import { MessageEntity } from './entities/message.entity';
 
 @Module({
     imports: [
