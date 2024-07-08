@@ -10,6 +10,14 @@ export class UserController {
         private readonly tokenService: TokenService
     ) {}
 
+    @Get()
+    async findUserByToken(@Req() req: Request) {
+        const token = req.headers['authorization'].replace('Bearer ', '');
+        const tokenPayload = this.tokenService.verifyToken(token, 'access');
+
+        return this.userService.findOneByUid(tokenPayload.uuid);
+    }
+
     @Get('my-rooms')
     async myRooms(@Req() req: Request) {
         const token = req.headers.authorization.split(' ')[1];
