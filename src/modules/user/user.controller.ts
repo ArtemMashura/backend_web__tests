@@ -13,6 +13,7 @@ export class UserController {
     @Get('my-rooms')
     async myRooms(@Req() req: Request) {
         const token = req.headers.authorization.split(' ')[1];
+        console.log(token);
         const payload = this.tokenService.verifyToken(token, 'access');
 
         return this.userService.findChatsByUser(payload.uuid);

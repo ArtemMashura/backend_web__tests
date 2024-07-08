@@ -8,6 +8,9 @@ export class MessageEntity extends AbstractEntity {
     @Column()
     message: string;
 
+    @Column({ nullable: true })
+    file_url?: string;
+
     @Column('timestamptz')
     date: Date;
 

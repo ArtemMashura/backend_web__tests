@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { TokenService } from 'src/services/token/token.service';
 import { UserService } from '../user/user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthMessage } from './messages/auth.message';
+import { CreateUserDto } from 'src/global/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,15 +14,19 @@ export class AuthService {
     ) {}
 
     async generateTokens(id: number, uuid: string) {
-        return await this.tokenService.generateTokens({ id, uuid });
+        return await this.tokenService.generateToken({ id, uuid });
     }
 
     async create(newUser: CreateUserDto, profile_url: string) {
+        if (!this.comparePasswords(newUser.password, newUser.confirmPassword)) {
+            throw new BadRequestException("Password and confirm password must be the same!");
+        }
+
         return await this.userService.create({ ...newUser, profile_url });
     }
 
     async login(login: LoginDto) {
-        const user = await this.userService.findOneByUsername(login.username);
+        const user = await this.userService.findOneByNickname(login.nickname);
 
         if (!(await bcrypt.compare(login.password, user.password))) {
             throw new HttpException(
@@ -45,5 +49,9 @@ export class AuthService {
         const user = await this.userService.findOneByUid(tokenPayload.uuid);
 
         return await this.generateTokens(user.id, user.uuid);
+    }
+
+    comparePasswords(pass1: string, pass2: string) {
+        return pass1 === pass2;
     }
 }

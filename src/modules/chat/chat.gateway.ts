@@ -12,6 +12,8 @@ import { ChatService } from './chat.service';
 import { Logger } from '@nestjs/common';
 import { WSJoinDto } from './dto/join.dto';
 import { WSNewMessageDto } from './dto/create-message.dto';
+import { AbstractMessage } from './dto/abstarct-message.interface';
+import { Events } from './dto/events.enum';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -40,16 +42,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Rooms: `, client.rooms);
     }
 
-    @SubscribeMessage('message')
-    async sendMessage(@MessageBody() newMessage: WSNewMessageDto) {
-        // save message to database
-        const message = await this.chatService.createMessage(newMessage);
-        console.log('New message => ', message);
+    // @SubscribeMessage('message')
+    // async sendMessage(@MessageBody() newMessage: WSNewMessageDto) {
+    //     // save message to database
+    //     const message = await this.chatService.createMessage(newMessage);
+    //     console.log('New message => ', message);
 
-        // send mesage to room
-        console.log(`Rooms => `, this.io.sockets.adapter.rooms);
-        this.io.to(message.toRoomUid).emit('message', message);
-    }
+    //     // send mesage to room
+    //     console.log(`Rooms => `, this.io.sockets.adapter.rooms);
+    //     this.io.to(message.toRoomUid).emit('message', message);
+    // }
 
     @SubscribeMessage('file')
     async sendFile(@MessageBody() data: any) {
@@ -66,5 +68,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(
             `Client ${client.id} disconnected! Total connections: ${this.io.sockets.sockets.size}!`
         );
+    }
+
+    sendMessage(message: AbstractMessage) {
+        console.log('Message => ', message);
+        this.io.to(message.toRoomUid).emit('message', message);
     }
 }

@@ -5,10 +5,16 @@ import { RoomEntity } from 'src/modules/chat/entities/room.entity';
 @Entity('user')
 export class UserEntity extends AbstractEntity {
     @Column({ unique: true })
-    username: string;
+    nickname: string;
 
     @Column()
     password: string;
+
+    @Column()
+    email: string;
+    
+    @Column()
+    phone: string;
 
     @Column()
     profile_url: string;

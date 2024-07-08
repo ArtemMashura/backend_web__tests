@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '../../global/dto/create-user.dto';
 import { UserEntity } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -14,7 +14,11 @@ export class UserService {
 
     async create(createUserDto: CreateUserDto) {
         const isUserExist = await this.userRepository.exists({
-            where: { username: createUserDto.username },
+            where: [
+                { nickname: createUserDto.nickname }, 
+                { email: createUserDto.email },
+                { phone: createUserDto.phone },
+            ],
         });
 
         if (isUserExist) {
@@ -28,10 +32,10 @@ export class UserService {
         });
     }
 
-    async findOneByUsername(username: string) {
+    async findOneByNickname(nickname: string) {
         try {
             return await this.userRepository.findOneOrFail({
-                where: { username },
+                where: { nickname },
             });
         } catch (e) {
             throw new BadRequestException('User not found');

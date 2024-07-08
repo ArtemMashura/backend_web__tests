@@ -9,6 +9,8 @@ import { WSJoinDto } from './dto/join.dto';
 import { RoomEntity } from './entities/room.entity';
 import { WSNewMessageDto } from './dto/create-message.dto';
 import { MessageEntity } from './entities/message.entity';
+import { FilesUploadS3Service } from 'src/services/files-upload-s3/files-upload-s3.service';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class ChatService {
@@ -17,10 +19,11 @@ export class ChatService {
         private roomRepository: Repository<RoomEntity>,
         @InjectRepository(MessageEntity)
         private messageRepository: Repository<MessageEntity>,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly fileUploadService: FilesUploadS3Service,
     ) {}
 
-    async createMessage(newMessage: WSNewMessageDto) {
+    async createMessage(newMessage: WSNewMessageDto, file: Express.Multer.File) {
         // find room
         const room = await this.findOneByUid(newMessage.toRoomUid);
         console.log('Room => ', room);
@@ -33,13 +36,33 @@ export class ChatService {
         if (!isUserInRoom)
             throw new WsException('User is not a member of the room');
 
-        // save message
+        // if file provided - save it in s3
+        if (!file) {
+            // save message
+            const message = await this.messageRepository.save({
+                ...newMessage,
+                to: room,
+                from: user,
+                date: new Date(),
+            });
+
+            return message;
+        }
+
+
+        const file_url = await this.fileUploadService.uploadFile(
+            `${newMessage.fromUid}/${v4()}.${file.mimetype.split('/')[1]}`,
+            file.buffer,
+        );
+
         const message = await this.messageRepository.save({
             ...newMessage,
             to: room,
             from: user,
             date: new Date(),
+            file_url
         });
+
         return message;
     }
 

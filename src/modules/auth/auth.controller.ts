@@ -18,9 +18,9 @@ import { Response } from 'express';
 import { FilesUploadS3Service } from 'src/services/files-upload-s3/files-upload-s3.service';
 import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthMessage } from './messages/auth.message';
+import { CreateUserDto } from 'src/global/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -54,14 +54,17 @@ export class AuthController {
         )
         avatar: Express.Multer.File
     ) {
+        console.log(createUser);
+        console.log(avatar);
+
         const profile_url = await this.filesUploadS3Service.uploadProfilePhoto(
-            `${createUser.username}/${v4()}.${avatar.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
+            `${createUser.nickname}/${v4()}.${avatar.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
             avatar.buffer
         );
 
-        await this.authService.create(createUser, profile_url);
+        const newUser = await this.authService.create(createUser, profile_url);
 
-        return { success: true, message: AuthMessage.successRegister };
+        return { success: true, message: AuthMessage.successRegister, user: newUser };
     }
 
     @Post('login')
@@ -69,43 +72,44 @@ export class AuthController {
     async login(@Body() login: LoginDto, @Res() res: Response) {
         const user = await this.authService.login(login);
 
-        const { accessToken, refreshToken } =
-            await this.authService.generateTokens(user.id, user.uuid);
+        console.log(user);
+        const accessToken = await this.authService.generateTokens(user.id, user.uuid);
 
-        this.setATandRTCookies(res, accessToken, refreshToken);
+        this.setATandRTCookies(res, accessToken);
 
         return res.json({
             success: true,
             message: AuthMessage.successLogin,
             user,
+            accessToken
         });
     }
 
-    @Get('refresh-token')
-    @HttpCode(200)
-    async refreshToken(
-        @Headers('refresh_token') refreshTokenValue: string,
-        @Res() res: Response
-    ) {
-        if (!refreshTokenValue) {
-            throw new UnauthorizedException(AuthMessage.unauthorized);
-        }
+    // @Get('refresh-token')
+    // @HttpCode(200)
+    // async refreshToken(
+    //     @Headers('refresh_token') refreshTokenValue: string,
+    //     @Res() res: Response
+    // ) {
+    //     if (!refreshTokenValue) {
+    //         throw new UnauthorizedException(AuthMessage.unauthorized);
+    //     }
 
-        const { accessToken, refreshToken } =
-            await this.authService.refreshToken(refreshTokenValue);
+    //     const { accessToken, refreshToken } =
+    //         await this.authService.refreshToken(refreshTokenValue);
 
-        this.setATandRTCookies(res, accessToken, refreshToken);
+    //     this.setATandRTCookies(res, accessToken, refreshToken);
 
-        return res.json({
-            success: true,
-            message: AuthMessage.refreshTokenSuccess,
-        });
-    }
+    //     return res.json({
+    //         success: true,
+    //         message: AuthMessage.refreshTokenSuccess,
+    //     });
+    // }
 
     private setATandRTCookies(
         res: Response,
         accessToken: string,
-        refreshToken: string
+        refreshToken?: string
     ) {
         // set cookie with jwt access token to client browser
         res.cookie(this.accessTokenCookieKey, accessToken, {
@@ -114,6 +118,7 @@ export class AuthController {
             secure: false,
         });
 
+        if (!refreshToken) return;
         // set cookie with jwt refresh token to client browser
         res.cookie(this.refreshTokenCookieKey, refreshToken, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
