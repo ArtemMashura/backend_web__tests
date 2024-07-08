@@ -18,4 +18,9 @@ export class UserController {
 
         return this.userService.findChatsByUser(payload.uuid);
     }
+
+    @Get('/findAll')
+    async findAll() {
+        return this.userService.findAll();
+    }
 }

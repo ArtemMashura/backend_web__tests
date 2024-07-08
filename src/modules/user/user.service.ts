@@ -31,6 +31,10 @@ export class UserService {
             chats: [],
         });
     }
+    
+    async findAll() {
+        return this.userRepository.find();
+    }
 
     async findOneByNickname(nickname: string) {
         try {
