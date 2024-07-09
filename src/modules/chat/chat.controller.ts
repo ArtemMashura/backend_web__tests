@@ -3,10 +3,8 @@ import { Request } from 'express';
 import { TokenService } from 'src/services/token/token.service';
 import { ChatService } from './chat.service';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { WSJoinDto } from './dto/join.dto';
 import { WSNewMessageDto } from './dto/create-message.dto';
 import { ChatGateway } from './chat.gateway';
-import { Events } from './dto/events.enum';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('chat')

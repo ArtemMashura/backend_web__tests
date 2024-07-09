@@ -98,7 +98,7 @@ export class ChatService {
     async findOneByUid(uuid: string) {
         return await this.roomRepository.findOneOrFail({
             where: { uuid },
-            relations: ['users'],
+            relations: ['users', 'owner'],
         });
     }
 
@@ -106,10 +106,26 @@ export class ChatService {
         const room = await this.roomRepository.findOneBy({ uuid: roomUId });
         if (!room) throw new BadRequestException('Room not found');
 
-        return await this.messageRepository.find({
-            where: { to: { uuid: roomUId } },
-            relations: ['from'],
-        });
+        // return await this.messageRepository.find({
+        //     where: { to: { uuid: roomUId } },
+        //     relations: ['from'],
+        // });
+
+        return await this.messageRepository 
+            .createQueryBuilder('message')
+            .leftJoinAndSelect('message.to', 'to')
+            .leftJoinAndSelect('message.from', 'from')
+            .where('to.uuid = :uuid', { uuid: roomUId })
+            .select([
+                'message.id',
+                'message.uuid',
+                'message.date',
+                'message.message',
+                'message.file_url',
+                'from.nickname',
+                'from.profile_url',
+                'from.uuid',
+            ]).getMany();
     }
 
     // async newMessage(newMessage: CreateMessageDto, userUuid: string) {
