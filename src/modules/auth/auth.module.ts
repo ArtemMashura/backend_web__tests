@@ -4,9 +4,11 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TokenModule } from 'src/services/token/token.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from '../user/entities/user.entity';
 
 @Module({
-    imports: [FilesUploadS3Module, UserModule, TokenModule],
+    imports: [FilesUploadS3Module, UserModule, TokenModule, TypeOrmModule.forFeature([UserEntity])],
     controllers: [AuthController],
     providers: [AuthService],
 })

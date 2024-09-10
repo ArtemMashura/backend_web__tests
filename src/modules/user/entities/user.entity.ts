@@ -16,10 +16,13 @@ export class UserEntity extends AbstractEntity {
     @Column()
     phone: string;
 
-    @Column()
-    profile_url: string;
+    @Column({ nullable: true })
+    profile_url?: string;
 
     @ManyToMany(() => RoomEntity, (room) => room.users)
     @JoinTable()
     chats: RoomEntity[];
+
+    @Column({ nullable: true })
+    hashedRt?: string;
 }

@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { v4 } from 'uuid';
+import { Tokens } from 'src/modules/auth/types/tokens.type';
 
 @Injectable()
 export class TokenService {
@@ -10,13 +11,28 @@ export class TokenService {
         private readonly configService: ConfigService
     ) {}
 
-    public generateToken(payload: any) {
-        return this.jwtService.sign(payload, {
-            secret: this.configService.get<string>('SECRET'),
-            expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
-            algorithm: 'HS256',
-            jwtid: v4(),
-        });
+    public async generateToken(payload: any):Promise<Tokens> {
+        const [at, rt] = await Promise.all([
+            this.jwtService.signAsync(payload, {
+                secret: this.configService.get<string>('AT_SECRET'),
+                expiresIn: '15m',
+            }),
+            this.jwtService.signAsync(payload, {
+                secret: this.configService.get<string>('RT_SECRET'),
+                expiresIn: '7d',
+            }),
+        ])
+        return {
+            accessToken: at,
+            refreshToken: rt,
+        };
+        // this.jwtService.signAsync(payload,
+        //     {
+        //         secret: this.configService.get<string>('SECRET'),
+        //         expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
+        //         algorithm: 'HS256',
+        //         jwtid: v4(),
+        //     });
     }
 
     /**

@@ -40,5 +40,7 @@ export class ChatController {
         const message = await this.chatService.createMessage(newMessage, file);
 
         this.chatGateway.sendMessage(message);
+
+        return message
     }
 }
