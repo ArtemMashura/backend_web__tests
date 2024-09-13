@@ -5,8 +5,5 @@ export class WSNewMessageDto {
     message: string;
 
     @IsUUID()
-    fromUid: string;
-
-    @IsUUID()
     toRoomUid: string;
 }

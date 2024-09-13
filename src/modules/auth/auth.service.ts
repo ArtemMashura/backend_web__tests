@@ -8,7 +8,7 @@ import { CreateUserDto } from 'src/global/dto/create-user.dto';
 import { Tokens } from './types/tokens.type';
 import * as argon from 'argon2';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
@@ -28,13 +28,9 @@ export class AuthService {
         if (!this.comparePasswords(newUserInfo.password, newUserInfo.confirmPassword)) {
             throw new BadRequestException("Password and confirm password must be the same!");
         }
-        console.log(1)
         const newUser = await this.userService.create({ ...newUserInfo, profile_url });
-        console.log(2)
         const tokens = await this.generateTokens(newUser.id, newUser.uuid);
-        console.log(3)
         this.updateRtHash(newUser.id, tokens.refreshToken)
-        console.log(4)
         return [newUser, tokens]
     }
 
@@ -68,6 +64,23 @@ export class AuthService {
         this.updateRtHash(user.id, tokens.refreshToken)
 
         return await this.generateTokens(user.id, user.uuid);
+    }
+
+    async logout(refreshToken: string) {
+        // throw error if token is not valid
+        const tokenPayload = await this.tokenService.verifyToken(
+            refreshToken,
+            'refresh'
+        );
+
+        // throw error if user is not found
+        await this.userRepository.createQueryBuilder()
+            .update(UserEntity)
+            .set({ hashedRt: null })
+            .where("uuid = :userUUid", { userUUid: tokenPayload.uuid })
+            .execute()
+
+        return
     }
 
     comparePasswords(pass1: string, pass2: string) {

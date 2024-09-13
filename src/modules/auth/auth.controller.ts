@@ -109,6 +109,23 @@ export class AuthController {
         });
     }
 
+    @Post('logout')
+    @HttpCode(204)
+    async logout(
+        @Headers('refresh_token') refreshTokenValue: string,
+        @Res() res: Response
+    ) {
+        if (!refreshTokenValue) {
+            throw new UnauthorizedException(AuthMessage.unauthorized);
+        }
+        console.log(1)
+        await this.authService.logout(refreshTokenValue);
+        console.log(11)
+        // this.setATandRTCookies(res, tokens);
+
+        return res.json()
+    }
+
     private setATandRTCookies(
         res: Response,
         tokens: Tokens,

@@ -17,6 +17,6 @@ export class MessageEntity extends AbstractEntity {
     @ManyToOne(() => UserEntity, (user) => user.id)
     from: UserEntity;
 
-    @ManyToOne(() => RoomEntity, (room) => room.id)
-    to: RoomEntity;
+    @ManyToOne(() => RoomEntity, (room) => room.messages, {nullable : true, cascade: true, onDelete: "SET NULL"})
+    to?: RoomEntity;
 }

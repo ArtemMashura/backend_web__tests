@@ -5,6 +5,7 @@ import {
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import 'dotenv/config'
 
 export const dataSourceOptions: DataSourceOptions = {
     type: 'postgres',
@@ -39,8 +40,6 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
         };
     },
 };
-
-
 
 const dataSource = new DataSource(dataSourceOptions)
 export default dataSource

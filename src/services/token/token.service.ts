@@ -41,14 +41,27 @@ export class TokenService {
      * @param type   -  Access ot Refresh token
      */
     public verifyToken(token: string, type: 'access' | 'refresh') {
-        try {
-            return this.jwtService.verify(token, {
-                secret: this.configService.get<string>('SECRET'),
-                ignoreExpiration: false,
-                algorithms: ['HS256'],
-            });
-        } catch (e) {
-            throw new UnauthorizedException();
+        if (type === 'access') {
+            try {
+                return this.jwtService.verify(token, {
+                    secret: this.configService.get<string>('AT_SECRET'),
+                    ignoreExpiration: false,
+                    algorithms: ['HS256'],
+                });
+            } catch (e) {
+                throw new UnauthorizedException();
+            }
+        }
+        else if (type === 'refresh') {
+            try {
+                return this.jwtService.verify(token, {
+                    secret: this.configService.get<string>('RT_SECRET'),
+                    ignoreExpiration: false,
+                    algorithms: ['HS256'],
+                });
+            } catch (e) {
+                throw new UnauthorizedException();
+            }
         }
     }
 
