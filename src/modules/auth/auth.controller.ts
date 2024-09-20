@@ -42,33 +42,32 @@ export class AuthController {
     }
 
     @Post('register')
+    @UseInterceptors(FileInterceptor('file'))
     @HttpCode(201)
-    @UseInterceptors(FileInterceptor('avatar') as unknown as NestInterceptor)
     async create(
         @Body() createUser: CreateUserDto,
-        // @UploadedFile(                    // разкоментить когда дадут баккет
-        //     new ParseFilePipeBuilder()
-        //         .addFileTypeValidator({
-        //             fileType: /(jpg|jpeg|png|gif)$/,
-        //         })
-        //         .addMaxSizeValidator({
-        //             maxSize: 2 * 1000 * 1000,
-        //         })
-        //         .build({
-        //             errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        //         })
-        // )
-        // avatar: Express.Multer.File
-    @Res() res: Response) {
+        @UploadedFile(                   
+            new ParseFilePipeBuilder()
+                .addFileTypeValidator({
+                    fileType: /(jpg|jpeg|png|gif)$/,
+                })
+                .addMaxSizeValidator({
+                    maxSize: 2 * 1000 * 1000,
+                })
+                .build({
+                    errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+                })
+        ) file: Express.Multer.File, @Res() res: Response)
+        {
         console.log(createUser);
-        // console.log(avatar); // разкоментить когда дадут баккет
+        console.log(file);
 
-        // const profile_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       // разкоментить когда дадут баккет
-        //     `${createUser.nickname}/${v4()}.${avatar.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
-        //     avatar.buffer
-        // );
+        const profile_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       
+            `${createUser.nickname}/${v4()}.${file.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
+            file.buffer
+        );
 
-        const [newUser, tokens] = await this.authService.register(createUser,);        // разкоментить когда дадут баккет
+        const [newUser, tokens] = await this.authService.register(createUser, profile_url);        // разкоментить когда дадут баккет
         this.setATandRTCookies(res, tokens as Tokens);
         return res.json({ success: true, message: AuthMessage.successRegister, user: newUser, tokens: tokens });
     }

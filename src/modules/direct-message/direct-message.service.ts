@@ -65,7 +65,6 @@ export class DirectMessageService {
         const message = await this.messageRepository.save({
             ...newMessage,
             toDirectMessageRoomUUid: room.uuid,
-            to: room,
             from: user,
             date: new Date(),
             file_url
