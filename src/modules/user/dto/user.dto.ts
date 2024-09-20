@@ -9,7 +9,7 @@ export class UserDto {
     email: string;
 
     @IsString()
-    @IsPhoneNumber()
+    @IsPhoneNumber('UA')
     phone: string;
 
     @IsString()

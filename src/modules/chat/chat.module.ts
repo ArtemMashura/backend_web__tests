@@ -8,6 +8,7 @@ import { RoomEntity } from './entities/room.entity';
 import { UserModule } from '../user/user.module';
 import { MessageEntity } from './entities/message.entity';
 import { FilesUploadS3Module } from 'src/services/files-upload-s3/files-upload-s3.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { FilesUploadS3Module } from 'src/services/files-upload-s3/files-upload-s
         UserModule,
         TokenModule,
         FilesUploadS3Module,
+        MulterModule.register()
     ],
     controllers: [ChatController],
     providers: [ChatGateway, ChatService],

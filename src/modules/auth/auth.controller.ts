@@ -118,9 +118,7 @@ export class AuthController {
         if (!refreshTokenValue) {
             throw new UnauthorizedException(AuthMessage.unauthorized);
         }
-        console.log(1)
         await this.authService.logout(refreshTokenValue);
-        console.log(11)
         // this.setATandRTCookies(res, tokens);
 
         return res.json()

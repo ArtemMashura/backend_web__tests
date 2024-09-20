@@ -8,6 +8,7 @@ import { typeOrmAsyncConfig } from './config/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { UserModule } from './modules/user/user.module';
+import { DirectMessageModule } from './modules/direct-message/direct-message.module';
 
 @Module({
     imports: [
@@ -26,6 +27,7 @@ import { UserModule } from './modules/user/user.module';
         UserModule,
         AuthModule,
         ChatModule,
+        DirectMessageModule
     ],
     controllers: [AppController],
     providers: [AppService],

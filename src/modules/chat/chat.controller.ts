@@ -5,7 +5,7 @@ import { ChatService } from './chat.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { WSNewMessageDto } from './dto/create-message.dto';
 import { ChatGateway } from './chat.gateway';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('chat')
 export class ChatController {
@@ -39,11 +39,11 @@ export class ChatController {
     }
 
     @Post('message')
-    @UseInterceptors(FilesInterceptor('file'))
-    async newMessage(@Req() req: Request, @Body() newMessage: WSNewMessageDto, @UploadedFile() file: Express.Multer.File) {
+    @UseInterceptors(FileInterceptor('file'), FilesInterceptor)
+    async newMessage(@UploadedFile() file: Express.Multer.File, @Req() req: Request, @Body() newMessage: WSNewMessageDto, ) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-        console.log(user)
+        console.log(file.buffer)
         const message = await this.chatService.createMessage(newMessage, user.uuid, file);
 
         this.chatGateway.sendMessage(message);

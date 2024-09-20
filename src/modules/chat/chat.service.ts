@@ -26,7 +26,6 @@ export class ChatService {
     async createMessage(newMessage: WSNewMessageDto, userUuid:string, file: Express.Multer.File) {
         // find room
         const room = await this.findOneByUid(newMessage.toRoomUid);
-        console.log('Room => ', room);
         if (!room) throw new WsException('Room not found');
 
         // find user
@@ -92,6 +91,7 @@ export class ChatService {
             .leftJoinAndSelect("room.users", "user")
             .where("room.uuid = :roomUId", {roomUId: roomUId})
             .getOne()
+        console.log(room)
         // const room = await this.roomRepository.findOneBy({
             
         //     where: {
