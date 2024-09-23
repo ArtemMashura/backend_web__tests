@@ -15,7 +15,7 @@ export class UserDto {
     @IsString()
     @IsUrl()
     @IsOptional()
-    profile_url: string;
+    profile_url?: string;
 
     @IsString()
     password: string;

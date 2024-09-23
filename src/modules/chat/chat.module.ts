@@ -9,16 +9,22 @@ import { UserModule } from '../user/user.module';
 import { MessageEntity } from './entities/message.entity';
 import { FilesUploadS3Module } from 'src/services/files-upload-s3/files-upload-s3.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { ConnectedUserService } from '../connected-user/connected-user.service';
+import { ConnectedUserEntity } from '../connected-user/entities/connected-user-entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([RoomEntity, MessageEntity]),
+        TypeOrmModule.forFeature([
+            RoomEntity,
+            MessageEntity, 
+            ConnectedUserEntity
+        ]),
         UserModule,
         TokenModule,
         FilesUploadS3Module,
-        MulterModule.register()
+        MulterModule.register(),
     ],
     controllers: [ChatController],
-    providers: [ChatGateway, ChatService],
+    providers: [ChatGateway, ChatService, ConnectedUserService],
 })
 export class ChatModule {}
