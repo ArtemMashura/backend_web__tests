@@ -65,7 +65,7 @@ export class ChatService {
         return message;
     }
 
-    async createRoom(newRoom: CreateRoomDto, ownerUid: string, res: Response) {
+    async createRoom(newRoom: CreateRoomDto, ownerUid: string, file: Express.Multer.File) {
         const owner: UserEntity = await this.userService.findOneByUid(ownerUid);
         if (!newRoom.users.includes(ownerUid)) {
             throw new HttpException({
@@ -79,8 +79,13 @@ export class ChatService {
             return this.userService.findOneByUid(userUid);
         });
         const users: Array<UserEntity> = await Promise.all(usersPromises);
+        const file_url = await this.fileUploadService.uploadFile(
+            `${ownerUid}/${v4()}.${file.mimetype.split('/')[1]}`,
+            file.buffer,
+        );
         return await this.roomRepository.save({
             name: newRoom.name,
+            logo_url: file_url,
             owner,
             users,
         });

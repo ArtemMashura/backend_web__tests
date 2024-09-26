@@ -58,13 +58,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @SubscribeMessage('createRoom')
     async onCreateRoom(@ConnectedSocket() client:Socket, createdRoom:RoomEntity){
+        console.log(4)
         for (const user of createdRoom.users) {
             const connections: ConnectedUserI[] = await this.connectedUserService.findByUser(user)
             const rooms = await this.userService.findChatsByUser(user.uuid)
             for (const connection of connections) {
+                console.log(5)
                 await this.io.to(connection.socketId).emit('rooms', rooms)
             }
         }
+        console.log(6)
     }
 
     // @SubscribeMessage('message')

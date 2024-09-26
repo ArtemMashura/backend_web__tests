@@ -18,4 +18,7 @@ export class RoomEntity extends AbstractEntity {
 
     @OneToMany(() => MessageEntity, (message) => message.to)
     messages: MessageEntity[]
+
+    @Column({nullable: true})
+    logo_url?: string;
 }

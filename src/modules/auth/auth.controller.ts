@@ -49,7 +49,7 @@ export class AuthController {
         @UploadedFile(                   
             new ParseFilePipeBuilder()
                 .addFileTypeValidator({
-                    fileType: /(jpg|jpeg|png|gif)$/,
+                    fileType: /(jpg|jpeg|png)$/,
                 })
                 .addMaxSizeValidator({
                     maxSize: 2 * 1000 * 1000,
