@@ -23,6 +23,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { ConnectedUserEntity } from '../connected-user/entities/connected-user-entity';
 import { ConnectedUserI } from '../connected-user/dto/connected-user-interface';
 import { RoomEntity } from './entities/room.entity';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @WebSocketGateway({namespace: 'chat'})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -56,8 +57,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Rooms: `, client.rooms);
     }
 
-    @SubscribeMessage('createRoom')
-    async onCreateRoom(@ConnectedSocket() client:Socket, createdRoom:RoomEntity){
+    @OnEvent('createRoom')
+    public async onCreateRoom(createdRoom: RoomEntity){
         console.log(4)
         for (const user of createdRoom.users) {
             const connections: ConnectedUserI[] = await this.connectedUserService.findByUser(user)

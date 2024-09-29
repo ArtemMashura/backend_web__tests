@@ -59,13 +59,13 @@ export class DirectMessageGateway implements OnGatewayConnection, OnGatewayDisco
 
     handleConnection(client: Socket) {
         this.logger.log(
-            `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets.size}!`
+            `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets}!`
         );
     }
 
     handleDisconnect(client: Socket) {
         this.logger.log(
-            `Client ${client.id} disconnected! Total connections: ${this.io.sockets.sockets.size}!`
+            `Client ${client.id} disconnected! Total connections: ${this.io.sockets.sockets}!`
         );
     }
 

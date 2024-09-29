@@ -11,6 +11,8 @@ import { WSNewMessageDto } from './dto/create-message.dto';
 import { MessageEntity } from './entities/message.entity';
 import { FilesUploadS3Service } from 'src/services/files-upload-s3/files-upload-s3.service';
 import { v4 } from 'uuid';
+import { ChatGateway } from './chat.gateway';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ChatService {
@@ -21,6 +23,7 @@ export class ChatService {
         private messageRepository: Repository<MessageEntity>,
         private readonly userService: UserService,
         private readonly fileUploadService: FilesUploadS3Service,
+        private eventEmitter: EventEmitter2
     ) {}
 
     async createMessage(newMessage: WSNewMessageDto, userUuid:string, file: Express.Multer.File) {
@@ -79,16 +82,26 @@ export class ChatService {
             return this.userService.findOneByUid(userUid);
         });
         const users: Array<UserEntity> = await Promise.all(usersPromises);
-        const file_url = await this.fileUploadService.uploadFile(
-            `${ownerUid}/${v4()}.${file.mimetype.split('/')[1]}`,
-            file.buffer,
-        );
-        return await this.roomRepository.save({
+        if (file) {
+            var file_url = await this.fileUploadService.uploadFile(
+                `${ownerUid}/${v4()}.${file.mimetype.split('/')[1]}`,
+                file.buffer,
+            );
+        }
+
+        const createdRoom = await this.roomRepository.save({
             name: newRoom.name,
-            logo_url: file_url,
+            logo_url: file_url || null,
             owner,
             users,
         });
+
+        this.eventEmitter.emit(
+            'createRoom',
+            createdRoom
+        );
+        
+        return createdRoom 
     }
 
     async joinRoom(roomUId: string, userUuid: string) {

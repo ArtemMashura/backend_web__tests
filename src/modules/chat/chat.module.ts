@@ -11,18 +11,23 @@ import { FilesUploadS3Module } from 'src/services/files-upload-s3/files-upload-s
 import { MulterModule } from '@nestjs/platform-express';
 import { ConnectedUserService } from '../connected-user/connected-user.service';
 import { ConnectedUserEntity } from '../connected-user/entities/connected-user-entity';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             RoomEntity,
             MessageEntity, 
-            ConnectedUserEntity
+            ConnectedUserEntity,
+
         ]),
         UserModule,
         TokenModule,
         FilesUploadS3Module,
         MulterModule.register(),
+        EventEmitterModule.forRoot({
+            maxListeners: 1
+        })
     ],
     controllers: [ChatController],
     providers: [ChatGateway, ChatService, ConnectedUserService],
