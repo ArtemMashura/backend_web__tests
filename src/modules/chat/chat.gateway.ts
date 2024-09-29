@@ -26,7 +26,7 @@ import { RoomEntity } from './entities/room.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { UserEntity } from '../user/entities/user.entity';
 
-@WebSocketGateway({namespace: 'chat'})
+@WebSocketGateway(3002, {namespace: 'chat'})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private readonly chatService: ChatService,
@@ -88,29 +88,35 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(data);
     }
 
-    @OnEvent('onSuccesfulLogin')
-    async handleConnection(user: UserEntity, @ConnectedSocket() client: Socket) {
+    @SubscribeMessage('onSuccesfulLogin')
+    async hanConn(@MessageBody() user: UserEntity, @ConnectedSocket() client: Socket) {
         try {
             console.log(123123)
-            console.log(user)
             if (!user) {
                 return this.disconnect(client);
             }
             else {
+                console.log(client.id)
                 const asddas = await this.connectedUserService.create({
                     socketId: client.id,
                     user: user
                 })
                 console.log(asddas)
-                this.logger.log(
-                    `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets.size}!`
-                );
+                
             }
         }
         catch (error) {
             console.log(error)
             return this.disconnect(client)
         }
+        
+    }
+
+    async handleConnection(@ConnectedSocket() client: Socket) {
+        this.logger.log(
+            `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets}!`
+        );
+            
         
     }
 
@@ -122,7 +128,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async handleDisconnect(@ConnectedSocket() client: Socket) {
         await this.connectedUserService.deleteBySocketId(client.id)
         this.logger.log(
-            `Client ${client.id} disconnected! Total connections: ${this.io.sockets.sockets.size}!`
+            `Client ${client.id} disconnected! Total connections: ${this.io.sockets.sockets}!`
         );
         client.disconnect()
     }

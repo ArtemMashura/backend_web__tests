@@ -49,10 +49,7 @@ export class AuthService {
         const tokens = await this.generateTokens(user.id, user.uuid);
         this.updateRtHash(user.id, tokens.refreshToken)
         
-        this.eventEmitter.emit(
-            'onSuccesfulLogin',
-            user
-        );
+        
 
         return [user, tokens];
     }
