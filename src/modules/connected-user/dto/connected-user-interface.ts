@@ -3,5 +3,5 @@ import { UserDto } from "src/modules/user/dto/user.dto";
 export interface ConnectedUserI {
     id?: number,
     socketId: string;
-    user: UserDto
+    user_uuid: string
 }

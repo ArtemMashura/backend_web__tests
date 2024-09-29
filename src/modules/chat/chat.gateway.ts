@@ -35,6 +35,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         private readonly userService: UserService
     ) {}
 
+    async onModuleInit() {
+        await this.connectedUserService.deleteAll();
+    }
+
     @WebSocketServer() io: Server;
     private readonly logger = new Logger('CHAT');
 
@@ -58,11 +62,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Rooms: `, client.rooms);
     }
 
-    @OnEvent('createRoom')
-    public async onCreateRoom(createdRoom: RoomEntity){
+    @SubscribeMessage('createRoom')
+    public async onCreateRoom(@MessageBody() createdRoom: RoomEntity){
         console.log(4)
         for (const user of createdRoom.users) {
-            const connections: ConnectedUserI[] = await this.connectedUserService.findByUser(user)
+            console.log(user)
+            const connections: ConnectedUserI[] = await this.connectedUserService.findByUser(user.uuid)
+            console.log(connections)
+            const asd: ConnectedUserI[] = await this.connectedUserService.findByAll()
+            console.log(asd)
+            
             const rooms = await this.userService.findChatsByUser(user.uuid)
             for (const connection of connections) {
                 console.log(5)
@@ -99,7 +108,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 console.log(client.id)
                 const asddas = await this.connectedUserService.create({
                     socketId: client.id,
-                    user: user
+                    user_uuid: user.uuid
                 })
                 console.log(asddas)
                 

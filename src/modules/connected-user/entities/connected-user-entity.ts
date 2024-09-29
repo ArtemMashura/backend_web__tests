@@ -9,7 +9,6 @@ export class ConnectedUserEntity{
     @Column()
     socketId: string
 
-    @OneToOne(() => UserEntity)
-    @JoinColumn()
-    user: UserEntity
+    @Column()
+    user_uuid: string
 }

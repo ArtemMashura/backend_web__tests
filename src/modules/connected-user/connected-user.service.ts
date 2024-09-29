@@ -12,14 +12,16 @@ export class ConnectedUserService {
         private readonly connectedUserRepository: Repository<ConnectedUserEntity>
     ) {}
 
+    
+
     async create(connectedUser: ConnectedUserI): Promise<ConnectedUserI> {
         return this.connectedUserRepository.save(connectedUser)
     }
 
-    async findByUser(user: UserDto): Promise<ConnectedUserI[]> {
+    async findByUser(user_uuid: string): Promise<ConnectedUserI[]> {
         return this.connectedUserRepository.find({
             where: {
-                user: user
+                user_uuid: user_uuid
             }
         });
     }
