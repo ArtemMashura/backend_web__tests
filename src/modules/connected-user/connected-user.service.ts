@@ -24,6 +24,10 @@ export class ConnectedUserService {
         });
     }
 
+    async findByAll(): Promise<ConnectedUserI[]> {
+        return this.connectedUserRepository.find();
+    }
+
     async deleteBySocketId(socketId: string) {
     return this.connectedUserRepository.delete({ socketId });
     }

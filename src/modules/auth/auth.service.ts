@@ -10,6 +10,7 @@ import * as argon from 'argon2';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createQueryBuilder, Repository } from 'typeorm';
 import { UserEntity } from '../user/entities/user.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,8 @@ export class AuthService {
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
         private readonly userService: UserService,
-        private readonly tokenService: TokenService
+        private readonly tokenService: TokenService,
+        private eventEmitter: EventEmitter2
     ) {}
 
     async generateTokens(id: number, uuid: string):Promise<Tokens>  {
@@ -46,6 +48,11 @@ export class AuthService {
 
         const tokens = await this.generateTokens(user.id, user.uuid);
         this.updateRtHash(user.id, tokens.refreshToken)
+        
+        this.eventEmitter.emit(
+            'onSuccesfulLogin',
+            user
+        );
 
         return [user, tokens];
     }

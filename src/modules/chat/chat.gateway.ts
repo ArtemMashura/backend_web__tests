@@ -24,6 +24,7 @@ import { ConnectedUserEntity } from '../connected-user/entities/connected-user-e
 import { ConnectedUserI } from '../connected-user/dto/connected-user-interface';
 import { RoomEntity } from './entities/room.entity';
 import { OnEvent } from '@nestjs/event-emitter';
+import { UserEntity } from '../user/entities/user.entity';
 
 @WebSocketGateway({namespace: 'chat'})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -87,25 +88,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(data);
     }
 
-    async handleConnection(@ConnectedSocket() client: Socket) {
+    @OnEvent('onSuccesfulLogin')
+    async handleConnection(user: UserEntity, @ConnectedSocket() client: Socket) {
         try {
-            const decodedToken = await this.tokenService.verifyToken(client.handshake.headers.authorization, 'access');
-            const user: UserDto = await this.userService.findOneByUid(decodedToken.user.uuid);
+            console.log(123123)
+            console.log(user)
             if (!user) {
                 return this.disconnect(client);
             }
             else {
-                await this.connectedUserService.create({
+                const asddas = await this.connectedUserService.create({
                     socketId: client.id,
                     user: user
                 })
-        
+                console.log(asddas)
                 this.logger.log(
                     `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets.size}!`
                 );
             }
         }
-        catch {
+        catch (error) {
+            console.log(error)
             return this.disconnect(client)
         }
         

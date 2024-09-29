@@ -6,9 +6,17 @@ import { AuthService } from './auth.service';
 import { TokenModule } from 'src/services/token/token.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
-    imports: [FilesUploadS3Module, UserModule, TokenModule, TypeOrmModule.forFeature([UserEntity])],
+    imports: [
+        FilesUploadS3Module,
+        UserModule, TokenModule, 
+        TypeOrmModule.forFeature([UserEntity]),
+        EventEmitterModule.forRoot({
+            maxListeners: 1
+        })
+    ],
     controllers: [AuthController],
     providers: [AuthService],
 })
