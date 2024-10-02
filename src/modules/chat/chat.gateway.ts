@@ -69,8 +69,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             console.log(user)
             const connections: ConnectedUserI[] = await this.connectedUserService.findByUser(user.uuid)
             console.log(connections)
-            const asd: ConnectedUserI[] = await this.connectedUserService.findByAll()
-            console.log(asd)
+            
             
             const rooms = await this.userService.findChatsByUser(user.uuid)
             for (const connection of connections) {

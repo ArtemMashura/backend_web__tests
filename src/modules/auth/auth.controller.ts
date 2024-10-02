@@ -59,16 +59,11 @@ export class AuthController {
                 })
         ) file: Express.Multer.File, @Res() res: Response)
         {
-        console.log(createUser);
-        console.log(file);
+        
+        
 
-        const profile_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       
-            `${createUser.nickname}/${v4()}.${file.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
-            file.buffer
-        );
-
-        const [newUser, tokens] = await this.authService.register(createUser, profile_url);        // разкоментить когда дадут баккет
-        this.setATandRTCookies(res, tokens as Tokens);
+        const [newUser, tokens] = await this.authService.register(createUser, file);        // разкоментить когда дадут баккет
+        this.setATandRTCookies(res, (tokens as Tokens).accessToken, (tokens as Tokens).refreshToken);
         return res.json({ success: true, message: AuthMessage.successRegister, user: newUser, tokens: tokens });
     }
 
@@ -78,7 +73,7 @@ export class AuthController {
         const [user,tokens] = await this.authService.login(login);
 
         
-        this.setATandRTCookies(res, tokens as Tokens);
+        this.setATandRTCookies(res, (tokens as Tokens).accessToken, (tokens as Tokens).refreshToken);
         return res.json({
             success: true,
             message: AuthMessage.successLogin,
@@ -89,7 +84,7 @@ export class AuthController {
 
     @Post('refresh-token')
     @HttpCode(200)
-    async refreshToken(userId: number,
+    async refreshToken(
         @Headers('refresh_token') refreshTokenValue: string,
         @Res() res: Response
     ) {
@@ -97,14 +92,14 @@ export class AuthController {
             throw new UnauthorizedException(AuthMessage.unauthorized);
         }
 
-        const tokens:Tokens = await this.authService.refreshToken(refreshTokenValue);
+        const at:string = await this.authService.refreshToken(refreshTokenValue);
 
-        this.setATandRTCookies(res, tokens);
+        this.setATandRTCookies(res, at);
 
         return res.json({
             success: true,
             message: AuthMessage.refreshTokenSuccess,
-            tokens: tokens
+            at
         });
     }
 
@@ -123,21 +118,17 @@ export class AuthController {
         return res.json()
     }
 
-    private setATandRTCookies(
-        res: Response,
-        tokens: Tokens,
-       
-    ) {
+    private setATandRTCookies(res: Response, at:string, rt?:string) {
         // set cookie with jwt access token to client browser
-        res.cookie(this.accessTokenCookieKey, tokens.accessToken, {
+        res.cookie(this.accessTokenCookieKey, at, {
             maxAge: 1000 * 60 * 60 * 24 * 7,
             sameSite: true,
             secure: false,
         });
 
-        if (!tokens.refreshToken) return;
+        if (!rt) return;
         // set cookie with jwt refresh token to client browser
-        res.cookie(this.refreshTokenCookieKey, tokens.refreshToken, {
+        res.cookie(this.refreshTokenCookieKey, rt, {
             maxAge: 1000 * 60 * 60 * 24 * 30,
             sameSite: true,
             secure: false,

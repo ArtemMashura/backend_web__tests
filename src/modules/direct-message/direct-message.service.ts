@@ -60,6 +60,7 @@ export class DirectMessageService {
         const file_url = await this.fileUploadService.uploadFile(
             `${userUuid}/${v4()}.${file.mimetype.split('/')[1]}`,
             file.buffer,
+            file.mimetype
         );
 
         const message = await this.messageRepository.save({

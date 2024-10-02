@@ -17,10 +17,11 @@ export class FilesUploadS3Service {
                     'AWS_SECRET_ACCESS_KEY'
                 ),
             },
+            
         });
     }
 
-    async uploadProfilePhoto(filename: string, file: Buffer) {
+    async uploadProfilePhoto(filename: string, file: Buffer, mimetype: string) {
         return (
             await this.s3Client
                 .upload({
@@ -29,12 +30,13 @@ export class FilesUploadS3Service {
                     ),
                     Body: file,
                     Key: filename,
+                    ContentType: mimetype
                 })
                 .promise()
         ).Location;
     }
 
-    async uploadFile(filename: string, file: Buffer) {
+    async uploadFile(filename: string, file: Buffer, mimetype:string) {
         try {
             return ( 
                 await this.s3Client
@@ -44,6 +46,7 @@ export class FilesUploadS3Service {
                         ),
                         Body: file,
                         Key: filename,
+                        ContentType: mimetype
                     })
                     .promise()
             ).Location;

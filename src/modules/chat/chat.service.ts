@@ -26,7 +26,7 @@ export class ChatService {
         private eventEmitter: EventEmitter2
     ) {}
 
-    async createMessage(newMessage: WSNewMessageDto, userUuid:string, file: Express.Multer.File) {
+    async createMessage(newMessage: WSNewMessageDto, userUuid:string, files: Express.Multer.File[]) {
         // find room
         const room = await this.findOneByUid(newMessage.toRoomUid);
         if (!room) throw new WsException('Room not found');
@@ -39,7 +39,7 @@ export class ChatService {
             throw new WsException('User is not a member of the room');
 
         // if file provided - save it in s3
-        if (!file) {
+        if (!files) {
             // save message
             const message = await this.messageRepository.save({
                 ...newMessage,
@@ -51,18 +51,24 @@ export class ChatService {
             return message;
         }
 
+        var files_urls_promises = []
+        files.forEach(file => {
+            files_urls_promises.push(this.fileUploadService.uploadFile(
+                `${userUuid}/${v4()}.${file.mimetype.split('/')[1]}`,
+                file.buffer,
+                file.mimetype
+            ))
+        });
 
-        const file_url = await this.fileUploadService.uploadFile(
-            `${userUuid}/${v4()}.${file.mimetype.split('/')[1]}`,
-            file.buffer,
-        );
+        var files_urls = await Promise.all(files_urls_promises)
+        console.log(files_urls)
 
         const message = await this.messageRepository.save({
             ...newMessage,
             to: room,
             from: user,
             date: new Date(),
-            file_url
+            files_urls
         });
 
         return message;
@@ -86,6 +92,7 @@ export class ChatService {
             var file_url = await this.fileUploadService.uploadFile(
                 `${ownerUid}/${v4()}.${file.mimetype.split('/')[1]}`,
                 file.buffer,
+                file.mimetype
             );
         }
 
@@ -99,7 +106,7 @@ export class ChatService {
         this.eventEmitter.emit(
             'createRoom',
             createdRoom
-        );
+          );
         
         return createdRoom 
     }

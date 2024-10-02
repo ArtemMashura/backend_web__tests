@@ -35,6 +35,25 @@ export class TokenService {
         //     });
     }
 
+    public async refreshAccessToken(payload: any):Promise<string> {
+        const[at] = await Promise.all([
+            this.jwtService.signAsync(payload, {
+                secret: this.configService.get<string>('AT_SECRET'),
+                expiresIn: '15m',
+            }),
+            
+        ])
+        return at
+        
+        // this.jwtService.signAsync(payload,
+        //     {
+        //         secret: this.configService.get<string>('SECRET'),
+        //         expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
+        //         algorithm: 'HS256',
+        //         jwtid: v4(),
+        //     });
+    }
+
     /**
      * Verify and return payload if token is valid
      * @param token  -  Token that will be verified

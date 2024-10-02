@@ -57,11 +57,12 @@ export class ChatController {
     }
 
     @Post('message')
-    @UseInterceptors(FileInterceptor('file'),)
-    async newMessage(@UploadedFile() file: Express.Multer.File, @Req() req: Request, @Body() newMessage: WSNewMessageDto) {
+    @UseInterceptors(FilesInterceptor('files'),)
+    async newMessage(@UploadedFiles() files: Express.Multer.File[], @Req() req: Request, @Body() newMessage: WSNewMessageDto) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-        const message = await this.chatService.createMessage(newMessage, user.uuid, file);
+        console.log(files)
+        const message = await this.chatService.createMessage(newMessage, user.uuid, files);
 
         
         this.chatGateway.sendMessage(message);

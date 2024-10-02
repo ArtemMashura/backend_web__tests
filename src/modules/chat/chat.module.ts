@@ -12,6 +12,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConnectedUserService } from '../connected-user/connected-user.service';
 import { ConnectedUserEntity } from '../connected-user/entities/connected-user-entity';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FileEntity } from './entities/file-url.entity';
 
 @Module({
     imports: [
@@ -19,7 +20,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
             RoomEntity,
             MessageEntity, 
             ConnectedUserEntity,
-
+            FileEntity
         ]),
         UserModule,
         TokenModule,
