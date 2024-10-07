@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { UserModule } from './modules/user/user.module';
 import { DirectMessageModule } from './modules/direct-message/direct-message.module';
+import { OpenAIChatModule } from './modules/openAIchat/openAIchat.module';
 
 @Module({
     imports: [
@@ -27,7 +28,8 @@ import { DirectMessageModule } from './modules/direct-message/direct-message.mod
         UserModule,
         AuthModule,
         ChatModule,
-        DirectMessageModule
+        DirectMessageModule,
+        OpenAIChatModule
     ],
     controllers: [AppController],
     providers: [AppService],

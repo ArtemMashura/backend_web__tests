@@ -1,7 +1,8 @@
 import { AbstractEntity } from 'src/global/entity/abstract.entity';
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 import { RoomEntity } from 'src/modules/chat/entities/room.entity';
 import { DirectMessageRoomEntity } from 'src/modules/direct-message/entities/direct-message-room.entity';
+import { OpenAIChatMessageEntity } from 'src/modules/openAIchat/entities/openAI-message.entity';
 
 @Entity('user')
 export class UserEntity extends AbstractEntity {
@@ -30,4 +31,8 @@ export class UserEntity extends AbstractEntity {
 
     @Column({ nullable: true })
     hashedRt?: string;
+
+    @OneToMany(() => OpenAIChatMessageEntity, (room) => room.chatWith)
+    @JoinTable()
+    openAIChat: OpenAIChatMessageEntity[];
 }
