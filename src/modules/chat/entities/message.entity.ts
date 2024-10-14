@@ -10,7 +10,7 @@ export class MessageEntity extends AbstractEntity {
     @Column()
     message: string;
 
-    @OneToMany(() => FileEntity, (file) => file.message, {nullable: true, eager: true})
+    @OneToMany(() => FileEntity, (file) => file.message, {nullable: true, eager: true, cascade: ['insert']})
     files_urls?: FileEntity[]
 
     @Column('timestamptz')

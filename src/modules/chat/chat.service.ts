@@ -13,6 +13,7 @@ import { FilesUploadS3Service } from 'src/services/files-upload-s3/files-upload-
 import { v4 } from 'uuid';
 import { ChatGateway } from './chat.gateway';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FileEntity } from './entities/file-url.entity';
 
 @Injectable()
 export class ChatService {
@@ -21,6 +22,8 @@ export class ChatService {
         private roomRepository: Repository<RoomEntity>,
         @InjectRepository(MessageEntity)
         private messageRepository: Repository<MessageEntity>,
+        @InjectRepository(FileEntity)
+        private fileRepository: Repository<FileEntity>,
         private readonly userService: UserService,
         private readonly fileUploadService: FilesUploadS3Service,
         private eventEmitter: EventEmitter2
@@ -48,6 +51,8 @@ export class ChatService {
                 date: new Date(),
             });
 
+            
+
             return message;
         }
 
@@ -68,10 +73,23 @@ export class ChatService {
             to: room,
             from: user,
             date: new Date(),
-            files_urls
         });
 
-        return message;
+        const filesToSave = files_urls.map(file_url => ({
+            file_url: file_url,
+            message: message,
+        }));
+
+        const filesInDB = await this.fileRepository.createQueryBuilder()
+        .insert()
+        .into(FileEntity)
+        .values(filesToSave)
+        .execute();
+
+        return {
+            ...message,
+            files_urls: filesInDB
+        };
     }
 
     async createRoom(newRoom: CreateRoomDto, ownerUid: string, file: Express.Multer.File) {
@@ -251,17 +269,20 @@ export class ChatService {
             .createQueryBuilder('message')
             .leftJoinAndSelect('message.to', 'to')
             .leftJoinAndSelect('message.from', 'from')
-            .where('to.uuid = :uuid', { uuid: roomUId })
-            .select([
-                'message.id',
-                'message.uuid',
-                'message.date',
-                'message.message',
-                'message.file_url',
-                'from.nickname',
-                'from.profile_url',
-                'from.uuid',
-            ]).getMany();
+            .leftJoinAndSelect('message.files_urls', 'files_urls')
+            // .where('to.uuid = :uuid', { uuid: roomUId })
+            // .select([
+            //     'message.id',
+            //     'message.uuid',
+            //     'message.date',
+            //     'message.message',
+            //     'from.nickname',
+            //     'from.profile_url',
+            //     'from.uuid',
+            //     'files_urls',
+            //     'files_urls.file_url'
+            // ])
+            .getMany();
     }
 
     

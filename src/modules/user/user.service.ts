@@ -69,19 +69,22 @@ export class UserService {
             
         // });
 
-        var rooms = await this.roomRepository.createQueryBuilder('room')
-            .leftJoinAndSelect('room.messages', 'messages')
-            .leftJoinAndSelect('room.users', 'users')
-            .where('users.uuid = :uuid', { uuid: uuid })
-            .getMany();
+        // var rooms = await this.roomRepository.createQueryBuilder('room')
+            // .leftJoinAndSelect('room.messages', 'messages')
+            // .leftJoinAndSelect('room.users', 'users')
+            // .where('users.uuid = :uuid', { uuid: uuid })
+            // .getMany();
 
-        // var rooms = await this.roomRepository.find({
-        //     relations: {
-        //         messages: true,
-        //         users: true,
-        //         owner: true
-        //     },  
-        // });
+        var rooms = await this.roomRepository.find({
+            relations: {
+                messages: true,
+                users: true,
+                owner: true,
+            },  
+            select: {
+                messages: true
+            }
+        });
         return rooms
     }
 }

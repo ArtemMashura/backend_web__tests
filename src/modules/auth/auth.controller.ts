@@ -70,10 +70,12 @@ export class AuthController {
     @Post('login')
     @HttpCode(200)
     async login(@Body() login: LoginDto, @Res() res: Response) {
+        console.log("login start")
         const [user,tokens] = await this.authService.login(login);
 
         
         this.setATandRTCookies(res, (tokens as Tokens).accessToken, (tokens as Tokens).refreshToken);
+        console.log(tokens)
         return res.json({
             success: true,
             message: AuthMessage.successLogin,

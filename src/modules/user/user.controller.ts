@@ -12,6 +12,7 @@ export class UserController {
 
     @Get()
     async findUserByToken(@Req() req: Request) {
+        console.log(req.headers)
         const token = req.headers['authorization'].replace('Bearer ', '');
         const tokenPayload = this.tokenService.verifyToken(token, 'access');
 
@@ -20,7 +21,7 @@ export class UserController {
 
     @Get('my-rooms')
     async myRooms(@Req() req: Request) {
-        const token = req.headers.authorization.split(' ')[1];
+        const token = req.headers['authorization'].replace('Bearer ', '');
         const payload = this.tokenService.verifyToken(token, 'access');
 
         return this.userService.findChatsByUser(payload.uuid);

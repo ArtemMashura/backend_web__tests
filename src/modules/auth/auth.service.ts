@@ -94,6 +94,8 @@ export class AuthService {
         delete user.password
         delete user.hashedRt
 
+        console.log("login succesful")
+
         return [user, tokens];
     }
 
@@ -129,14 +131,7 @@ export class AuthService {
         });
 
 
-        // await this.prisma.user.update({
-        //   where: {
-        //     id: userId,
-        //   },
-        //   data: {
-        //     hashedRt: hash,
-        //   },
-        // });
+        
     }
 
     
