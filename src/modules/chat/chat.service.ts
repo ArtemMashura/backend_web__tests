@@ -270,7 +270,7 @@ export class ChatService {
             .leftJoinAndSelect('message.to', 'to')
             .leftJoinAndSelect('message.from', 'from')
             .leftJoinAndSelect('message.files_urls', 'files_urls')
-            // .where('to.uuid = :uuid', { uuid: roomUId })
+            .where('to.uuid = :uuid', { uuid: roomUId })
             // .select([
             //     'message.id',
             //     'message.uuid',
