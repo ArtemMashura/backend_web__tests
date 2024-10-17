@@ -264,25 +264,26 @@ export class ChatService {
         //     where: { to: { uuid: roomUId } },
         //     relations: ['from'],
         // });
-
-        return await this.messageRepository 
-            .createQueryBuilder('message')
-            .leftJoinAndSelect('message.to', 'to')
-            .leftJoinAndSelect('message.from', 'from')
-            .leftJoinAndSelect('message.files_urls', 'files_urls')
-            .where('to.uuid = :uuid', { uuid: roomUId })
-            // .select([
-            //     'message.id',
-            //     'message.uuid',
-            //     'message.date',
-            //     'message.message',
-            //     'from.nickname',
-            //     'from.profile_url',
-            //     'from.uuid',
-            //     'files_urls',
-            //     'files_urls.file_url'
-            // ])
-            .getMany();
+        const messagesFromDB = await this.messageRepository 
+        .createQueryBuilder('message')
+        .leftJoinAndSelect('message.to', 'to')
+        .leftJoinAndSelect('message.from', 'from')
+        .leftJoinAndSelect('message.files_urls', 'files_urls')
+        .where('to.uuid = :uuid', { uuid: roomUId })
+        // .select([
+        //     'message.id',
+        //     'message.uuid',
+        //     'message.date',
+        //     'message.message',
+        //     'from.nickname',
+        //     'from.profile_url',
+        //     'from.uuid',
+        //     'files_urls',
+        //     'files_urls.file_url'
+        // ])
+        .getMany();
+        const messages = messagesFromDB.sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
+        return messages
     }
 
     
