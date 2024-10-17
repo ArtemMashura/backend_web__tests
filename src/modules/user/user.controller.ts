@@ -12,7 +12,6 @@ export class UserController {
 
     @Get()
     async findUserByToken(@Req() req: Request) {
-        console.log(req.headers)
         const token = req.headers['authorization'].replace('Bearer ', '');
         const tokenPayload = this.tokenService.verifyToken(token, 'access');
 

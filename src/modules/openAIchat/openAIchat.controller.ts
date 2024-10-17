@@ -16,12 +16,13 @@ export class OpenAIChatController {
     async newMessage(@Req() req: Request, @Body() dto: openAIChatMessageDto) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-        const message = await this.openAIChatService.createMessage(dto, user.uuid);
+        console.log(dto)
+        const messages = await this.openAIChatService.createMessage(dto, user.uuid);
 
         
         // this.chatGateway.sendMessage(message);
 
-        return message
+        return messages
     }
 
     @Get('load-messages')
@@ -29,12 +30,14 @@ export class OpenAIChatController {
     async loadMessages(@Req() req: Request) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-        const message = await this.openAIChatService.findByUid(user.uuid);
+        const messages = await this.openAIChatService.findByUid(user.uuid);
 
         
         // this.chatGateway.sendMessage(message);
 
-        return message
+        return {
+            messages: messages
+        }
     }
 
     @Delete('clear-history')

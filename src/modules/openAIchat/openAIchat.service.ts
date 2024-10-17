@@ -26,21 +26,25 @@ export class OpenAIChatService {
     ) {}
 
     async createMessage(dto: openAIChatMessageDto, uuid: string) {
+        try {
+
+        
         // const messagesFromDB = await this.openAIChatMessageRepository.createQueryBuilder('room')
         //     .leftJoinAndSelect('room.chatWith', 'user')
         //     .where('user.uuid = :uuid', { uuid: uuid })
         //     .getMany();
-
+        console.log(1111111111)
         const user = await this.userRepository.findOne({
             where: {
                 uuid: uuid
             }
         })
-
+        console.log(2222222222)
         const requestMessages= [...dto.messages, dto.newMessage]
 
         console.log(requestMessages)
-        this.openAIChatMessageRepository.save({
+        console.log(3333333333)
+        const userMessage = await this.openAIChatMessageRepository.save({
             ...dto.newMessage as DeepPartial<OpenAIChatMessageEntity>,
             date: new Date(),
             chatWith: user
@@ -52,14 +56,20 @@ export class OpenAIChatService {
         });
 
 
-        this.openAIChatMessageRepository.save({
+        const chatGptResponseMessage = await this.openAIChatMessageRepository.save({
             ...completion.choices[0].message,
             date: new Date(),
             chatWith: user
         })
     
-       return completion.choices[0].message
-
+       return {
+            userMessage: userMessage,
+            chatGptResponseMessage: chatGptResponseMessage
+       }
+    }
+        catch (err){
+            console.log(err)
+        }
     }
 
     async findByUid(uuid: string) {
