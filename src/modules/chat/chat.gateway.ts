@@ -141,7 +141,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     sendMessage(message: AbstractMessage) {
+        this.logger.log(`Message => ${message}`)
         const result = this.io.to(message.toRoomUid).emit('message', message);
-        
     }
 }
