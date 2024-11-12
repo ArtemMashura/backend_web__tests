@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseFilePipeBuilder, Patch, Post, Req, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, HttpCode, HttpStatus, MaxFileSizeValidator, Param, ParseFilePipe, ParseFilePipeBuilder, Patch, Post, Req, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { TokenService } from 'src/services/token/token.service';
 import { ChatService } from './chat.service';
@@ -20,20 +20,17 @@ export class ChatController {
     @Post('create-room')
     @HttpCode(201)
     async createRoom(@Body() roomDto: CreateRoomDto, @Req() req: Request, @Res() res: Response, @UploadedFile(                   
-        new ParseFilePipeBuilder()
-            .addFileTypeValidator({
-                fileType: /(jpg|jpeg|png)$/,
-            })
-            .addMaxSizeValidator({
-                maxSize: 2 * 1000 * 1000,
-            })
-            .build({
-                errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-            })
-    ) file: Express.Multer.File) {
+        new ParseFilePipe({
+            validators: [
+                new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
+                new FileTypeValidator({fileType: /(jpg|jpeg|png)$/})
+            ],
+            fileIsRequired: false
+        })
+    ) file?: Express.Multer.File) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-
+        console.log(roomDto)
         const chatInfo = await this.chatService.createRoom(roomDto, user.uuid, file);
         return res.json({
             success: true,
@@ -64,7 +61,6 @@ export class ChatController {
         console.log(files)
         const message = await this.chatService.createMessage(newMessage, user.uuid, files);
 
-        
         this.chatGateway.sendMessage(message);
 
         return message

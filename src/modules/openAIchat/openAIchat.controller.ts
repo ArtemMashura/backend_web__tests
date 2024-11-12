@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseFilePi
 import { Request, Response } from 'express';
 import { TokenService } from 'src/services/token/token.service';
 import { OpenAIChatService } from './openAIchat.service';
-import { openAIChatMessageDto } from './dto/openAIchatMessage';
+import { openAIChatMessageDto, openAIChatMessageInlineDto } from './dto/openAIchatMessage';
 
 @Controller('chat-gpt')
 export class OpenAIChatController {
@@ -16,11 +16,21 @@ export class OpenAIChatController {
     async newMessage(@Req() req: Request, @Body() dto: openAIChatMessageDto) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-        console.log(dto)
+
         const messages = await this.openAIChatService.createMessage(dto, user.uuid);
 
         
         // this.chatGateway.sendMessage(message);
+
+        return messages
+    }
+
+    @Post('message-inline')
+    async newMessageInline(@Req() req: Request, @Body() dto: openAIChatMessageInlineDto) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        const messages = await this.openAIChatService.createMessageInline(dto);
 
         return messages
     }

@@ -4,3 +4,7 @@ export class openAIChatMessageDto {
     newMessage: ChatCompletionMessageParam
     messages: ChatCompletionMessageParam[]
 }
+
+export class openAIChatMessageInlineDto {
+    request: ChatCompletionMessageParam
+}

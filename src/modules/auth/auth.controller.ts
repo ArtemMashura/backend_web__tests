@@ -1,12 +1,15 @@
 import {
     Body,
     Controller,
+    FileTypeValidator,
     Get,
     Headers,
     HttpCode,
     HttpStatus,
     Injectable,
+    MaxFileSizeValidator,
     NestInterceptor,
+    ParseFilePipe,
     ParseFilePipeBuilder,
     Post,
     Res,
@@ -44,24 +47,15 @@ export class AuthController {
     @Post('register')
     @UseInterceptors(FileInterceptor('file'))
     @HttpCode(201)
-    async create(
-        @Body() createUser: CreateUserDto,
-        @UploadedFile(                   
-            new ParseFilePipeBuilder()
-                .addFileTypeValidator({
-                    fileType: /(jpg|jpeg|png)$/,
-                })
-                .addMaxSizeValidator({
-                    maxSize: 2 * 1000 * 1000,
-                })
-                .build({
-                    errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-                })
-        ) file: Express.Multer.File, @Res() res: Response)
-        {
+    async create(@Body() createUser: CreateUserDto, @Res() res: Response, @UploadedFile(                   
+            new ParseFilePipe({
+                validators: [
+                    new FileTypeValidator({fileType: /(jpg|jpeg|png)$/})
+                ],
+                fileIsRequired: false
+            })
+        ) file?: Express.Multer.File) {
         
-        
-
         const [newUser, tokens] = await this.authService.register(createUser, file);        // разкоментить когда дадут баккет
         this.setATandRTCookies(res, (tokens as Tokens).accessToken, (tokens as Tokens).refreshToken);
         return res.json({ success: true, message: AuthMessage.successRegister, user: newUser, tokens: tokens });

@@ -10,6 +10,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { UserModule } from './modules/user/user.module';
 import { DirectMessageModule } from './modules/direct-message/direct-message.module';
 import { OpenAIChatModule } from './modules/openAIchat/openAIchat.module';
+import { DaleeImageGenerationModule } from './modules/dalee-image-generation/dalee-image-generation.module';
 
 @Module({
     imports: [
@@ -29,7 +30,8 @@ import { OpenAIChatModule } from './modules/openAIchat/openAIchat.module';
         AuthModule,
         ChatModule,
         DirectMessageModule,
-        OpenAIChatModule
+        OpenAIChatModule,
+        DaleeImageGenerationModule
     ],
     controllers: [AppController],
     providers: [AppService],

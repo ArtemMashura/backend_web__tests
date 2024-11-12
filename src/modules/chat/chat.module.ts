@@ -27,7 +27,7 @@ import { FileEntity } from './entities/file-url.entity';
         FilesUploadS3Module,
         MulterModule.register(),
         EventEmitterModule.forRoot({
-            maxListeners: 1
+            maxListeners: 10
         })
     ],
     controllers: [ChatController],

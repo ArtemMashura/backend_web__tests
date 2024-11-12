@@ -80,11 +80,13 @@ export class ChatService {
             message: message,
         }));
 
-        const filesInDB = await this.fileRepository.createQueryBuilder()
-        .insert()
-        .into(FileEntity)
-        .values(filesToSave)
-        .execute();
+        const filesInDB = this.fileRepository.create(filesToSave);
+        await this.fileRepository.insert(filesInDB);
+        // const filesInDB = await this.fileRepository.createQueryBuilder()
+        // .insert()
+        // .into(FileEntity)
+        // .values(filesToSave)
+        // .execute();
 
         return {
             ...message,
@@ -184,10 +186,13 @@ export class ChatService {
     }
 
     async findOneByUid(uuid: string) {
-        return await this.roomRepository.findOneOrFail({
+        var dataFromDB = await this.roomRepository.findOneOrFail({
             where: { uuid },
-            relations: ['users', 'owner'],
+            relations: ['users', 'owner', 'messages'],
         });
+        const sortedMessages = dataFromDB.messages.sort((b, a) => a.created_at.getTime() - b.created_at.getTime())
+        dataFromDB.messages = sortedMessages
+        return dataFromDB
     }
 
     async findAll() {

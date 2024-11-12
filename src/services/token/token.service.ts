@@ -84,11 +84,5 @@ export class TokenService {
         }
     }
 
-    public generateTokenEmail(payload: object) {
-        return this.jwtService.sign(payload, {
-            secret: this.configService.get<string>('SECRET'),
-            expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
-            algorithm: 'HS256',
-        });
-    }
+    
 }

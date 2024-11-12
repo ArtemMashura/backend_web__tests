@@ -17,12 +17,12 @@ export class UserService {
 
     async create(createUserDto: CreateUserDto) {
         
-
-        return await this.userRepository.save({
+        const newUser = await this.userRepository.save({
             ...createUserDto,
             password: await bcrypt.hash(createUserDto.password, 10),
             chats: [],
         });
+        return newUser
     }
     
     async findAll() {
@@ -69,22 +69,25 @@ export class UserService {
             
         // });
 
-        // var rooms = await this.roomRepository.createQueryBuilder('room')
-            // .leftJoinAndSelect('room.messages', 'messages')
-            // .leftJoinAndSelect('room.users', 'users')
-            // .where('users.uuid = :uuid', { uuid: uuid })
-            // .getMany();
+        var rooms = await this.roomRepository.createQueryBuilder('room')
+            .leftJoinAndSelect('room.messages', 'messages')
+            .leftJoinAndSelect('room.users', 'users')
+            .leftJoinAndSelect('room.owner', 'owner')
+            .where('users.uuid = :uuid', { uuid: uuid })
+            .getMany();
 
-        var rooms = await this.roomRepository.find({
-            relations: {
-                messages: true,
-                users: true,
-                owner: true,
-            },  
-            select: {
-                messages: true
-            }
-        });
+        // var rooms = await this.roomRepository.find({
+        //     relations: {
+        //         messages: true,
+        //         users: true,
+        //         owner: true,
+        //     },  
+        //     select: {
+        //         messages: true
+        //     }
+        // });
+
+
         return rooms
     }
 }

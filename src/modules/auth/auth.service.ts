@@ -21,7 +21,8 @@ export class AuthService {
         private userRepository: Repository<UserEntity>,
         private readonly userService: UserService,
         private readonly tokenService: TokenService,
-        private readonly filesUploadS3Service: FilesUploadS3Service
+        private readonly filesUploadS3Service: FilesUploadS3Service,
+        private eventEmitter: EventEmitter2
 
     ) {}
 
@@ -44,15 +45,14 @@ export class AuthService {
 
     async register(newUserInfo: CreateUserDto, file?: Express.Multer.File):Promise<Array<object>> {
         if (!this.comparePasswords(newUserInfo.password, newUserInfo.confirmPassword)) {
+            console.log("error thrown")
             throw new BadRequestException("Password and confirm password must be the same!");
         }
-
         const user = await this.userRepository.createQueryBuilder("user")
             .where("user.nickname = :nickname", { nickname: newUserInfo.nickname })
             .orWhere("user.email = :email", { email: newUserInfo.email })
             .orWhere("user.phone = :phone", { phone: newUserInfo.phone })
             .getOne()
-
         if (user) {
             var message;
             if (user.nickname === newUserInfo.nickname)
@@ -62,15 +62,17 @@ export class AuthService {
             else if (user.phone === newUserInfo.phone)
                 message = "User with such phone number already exists"
             else message = "Unknown error"
+            console.log(message)
             throw new ConflictException(message);
         }
-           
-
-        const profile_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       
-            `${newUserInfo.nickname}/${v4()}.${file.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
-            file.buffer,
-            file.mimetype
-        );
+        var profile_url: string = null;
+        if (file) {
+            profile_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       
+                `${newUserInfo.nickname}/${v4()}.${file.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
+                file.buffer,
+                file.mimetype
+            );
+        }
 
         const newUser = await this.userService.create({ ...newUserInfo, profile_url });
         const tokens = await this.generateTokens(newUser.id, newUser.uuid);
@@ -94,7 +96,10 @@ export class AuthService {
         delete user.password
         delete user.hashedRt
 
-        console.log("login succesful")
+        this.eventEmitter.emit(
+            'onSuccesfulLogin',
+            user
+        );
 
         return [user, tokens];
     }

@@ -43,10 +43,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly logger = new Logger('CHAT');
 
     @SubscribeMessage('join-room')
-    async joinRoom(
-        @MessageBody() joinDto: WSJoinDto,
-        @ConnectedSocket() client: Socket
-    ) {
+    async joinRoom(@MessageBody() joinDto: WSJoinDto, @ConnectedSocket() client: Socket) {
+        this.logger.log(
+            `room-joined`
+        );
         // // add user to room in database
         // const user = await this.chatService.joinRoom(joinDto);
 
@@ -105,11 +105,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }
             else {
                 console.log(client.id)
-                const asddas = await this.connectedUserService.create({
+                this.connectedUserService.create({
                     socketId: client.id,
                     user_uuid: user.uuid
                 })
-                console.log(asddas)
                 
             }
         }
@@ -122,7 +121,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     async handleConnection(@ConnectedSocket() client: Socket) {
         this.logger.log(
-            `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets}!`
+            `Client ${client.id} connected! Total connections: ${this.io.sockets}!`
         );
             
         
@@ -142,7 +141,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     sendMessage(message: AbstractMessage) {
-        console.log('Message => ', message);
-        this.io.to(message.toRoomUid).emit('message', message);
+        const result = this.io.to(message.toRoomUid).emit('message', message);
+        
     }
 }
