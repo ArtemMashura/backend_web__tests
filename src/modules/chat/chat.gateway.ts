@@ -99,7 +99,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('onSuccesfulLogin')
     async hanConn(@MessageBody() user: UserEntity, @ConnectedSocket() client: Socket) {
         try {
-            console.log(123123)
+            this.logger.log("onSuccesfulLogin triggered")
             if (!user) {
                 return this.disconnect(client);
             }

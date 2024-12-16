@@ -96,6 +96,7 @@ export class AuthService {
         delete user.password
         delete user.hashedRt
 
+        console.log("emitting onSuccesfulLogin")
         this.eventEmitter.emit(
             'onSuccesfulLogin',
             user

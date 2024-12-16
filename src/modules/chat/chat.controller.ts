@@ -22,7 +22,7 @@ export class ChatController {
     async createRoom(@Body() roomDto: CreateRoomDto, @Req() req: Request, @Res() res: Response, @UploadedFile(                   
         new ParseFilePipe({
             validators: [
-                new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
+                // new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
                 new FileTypeValidator({fileType: /(jpg|jpeg|png)$/})
             ],
             fileIsRequired: false

@@ -91,10 +91,12 @@ export class OpenAIChatService {
     }
 
     async findByUid(uuid: string) {
-        return await this.openAIChatMessageRepository.createQueryBuilder('room')
+        const dataFromDB = await this.openAIChatMessageRepository.createQueryBuilder('room')
             .leftJoin('room.chatWith', 'user')
             .where('user.uuid = :uuid', { uuid: uuid })
             .getMany();
+        const sortedMessages = dataFromDB.sort((b, a) => a.created_at.getTime() - b.created_at.getTime())
+        return sortedMessages
     }
 
     async clearHistory(uuid: string) {
