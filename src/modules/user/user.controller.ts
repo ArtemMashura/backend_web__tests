@@ -1,7 +1,9 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, HttpCode, ParseFilePipe, Patch, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Request } from 'express';
 import { TokenService } from 'src/services/token/token.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 export class UserController {
@@ -29,5 +31,53 @@ export class UserController {
     @Get('/findAll')
     async findAll() {
         return this.userService.findAll();
+    }
+
+    @Patch('change-password')
+    @HttpCode(200)
+    async changePassword(@Req() req: Request, @Body() updateUser: UpdateUserDto){
+        const token = req.headers['authorization'].replace('Bearer ', '');
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        return this.userService.changePassword(updateUser, user.uuid);
+        // res.json({ success: true });
+    }
+
+    @Patch('change-name')
+    @HttpCode(200)
+    async changeName(@Req() req: Request, @Body() updateUser: UpdateUserDto){
+        const token = req.headers['authorization'].replace('Bearer ', '');
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        return this.userService.changeName(updateUser, user.uuid);
+        // res.json({ success: true });
+    }
+
+    @Patch('change-profile-picture')
+    @HttpCode(200)
+    @UseInterceptors(FileInterceptor('file'))
+    async changeProfileUrl(@Req() req: Request, @UploadedFile(                   
+                new ParseFilePipe({
+                    validators: [
+                        new FileTypeValidator({fileType: /(jpg|jpeg|png)$/})
+                    ],
+                    fileIsRequired: true
+                })
+            ) file: Express.Multer.File){
+        const token = req.headers['authorization'].replace('Bearer ', '');
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        return this.userService.changeProfilePicture(file, user.uuid);
+        // res.json({ success: true });
+    }
+
+    @Delete('delete-account')
+    @HttpCode(204)
+    async deleteAccount(@Req() req: Request){
+        const token = req.headers['authorization'].replace('Bearer ', '');
+        const user = this.tokenService.verifyToken(token, 'access');
+        console.log(user)
+        return this.userService.deleteAccount(user.uuid);
+        // res.json({ success: true });
     }
 }

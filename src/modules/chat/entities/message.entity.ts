@@ -16,10 +16,10 @@ export class MessageEntity extends AbstractEntity {
     @Column('timestamptz')
     date: Date;
 
-    @ManyToOne(() => UserEntity, (user) => user.id, {nullable: true, eager: true})
+    @ManyToOne(() => UserEntity, (user) => user.id, {nullable: true, eager: true, onDelete: "SET NULL"})
     from: UserEntity;
 
-    @ManyToOne(() => RoomEntity, (room) => room.messages, {nullable : true, eager: true, cascade: true, onDelete: "SET NULL"})
+    @ManyToOne(() => RoomEntity, (room) => room.messages, {nullable : true, eager: true, cascade: true, })
     to?: RoomEntity;
 
     @ManyToOne(() => DirectMessageRoomEntity, (room) => room.messages, {nullable : true, cascade: true, onDelete: "SET NULL"})

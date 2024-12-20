@@ -11,7 +11,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
     imports: [
         FilesUploadS3Module,
-        UserModule, TokenModule, 
+        UserModule,
+        TokenModule, 
         TypeOrmModule.forFeature([UserEntity]),
         EventEmitterModule.forRoot({
             maxListeners: 1

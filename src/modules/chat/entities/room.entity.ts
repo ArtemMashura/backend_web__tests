@@ -8,11 +8,13 @@ export class RoomEntity extends AbstractEntity {
     @Column()
     name: string;
 
-    @ManyToOne(() => UserEntity, (user) => user.id)
+    @ManyToOne(() => UserEntity, (user) => user.id, {
+        onDelete: 'SET NULL'
+    })
     owner: UserEntity;
 
     @ManyToMany(() => UserEntity, (user) => user.chats, {
-        cascade: true,
+        onDelete: 'SET NULL',
     })
     users: UserEntity[];
 
