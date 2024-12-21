@@ -108,8 +108,6 @@ export class UserService {
 
         if (!user)   throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-        if (user.password !== updateUser.oldPassword)   throw new HttpException("Current password doesn't match", HttpStatus.NOT_ACCEPTABLE);
-
         user.password = await bcrypt.hash(updateUser.password, 10)
 
         await this.userRepository.save(user);
