@@ -8,6 +8,7 @@ import { RoomEntity } from '../chat/entities/room.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FilesUploadS3Service } from 'src/services/files-upload-s3/files-upload-s3.service';
 import { v4 } from 'uuid';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -95,9 +96,9 @@ export class UserService {
         return rooms
     }
 
-    async changePassword(updateUser: UpdateUserDto, userUUID: string){
+    async changePassword(updateUser: ChangePasswordDto, userUUID: string){
         if (updateUser.password !== updateUser.confirmPassword){
-            throw new BadRequestException('Passwords do not match'); 
+            throw new BadRequestException('Fields "Password" and "Confirm password" do not match'); 
         }
         const user = await this.userRepository.findOne({
             where: {
@@ -106,6 +107,8 @@ export class UserService {
         })
 
         if (!user)   throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+        if (user.password !== updateUser.oldPassword)   throw new HttpException("Current password doesn't match", HttpStatus.NOT_ACCEPTABLE);
 
         user.password = await bcrypt.hash(updateUser.password, 10)
 

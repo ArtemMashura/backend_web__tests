@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { TokenService } from 'src/services/token/token.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -35,7 +36,7 @@ export class UserController {
 
     @Patch('change-password')
     @HttpCode(200)
-    async changePassword(@Req() req: Request, @Body() updateUser: UpdateUserDto){
+    async changePassword(@Req() req: Request, @Body() updateUser: ChangePasswordDto){
         const token = req.headers['authorization'].replace('Bearer ', '');
         const user = this.tokenService.verifyToken(token, 'access');
 
