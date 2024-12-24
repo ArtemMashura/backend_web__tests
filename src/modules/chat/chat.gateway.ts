@@ -113,7 +113,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }
         }
         catch (error) {
-            console.log(error)
+            this.logger.log(error)
             return this.disconnect(client)
         }
         
