@@ -26,7 +26,7 @@ import { RoomEntity } from './entities/room.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { UserEntity } from '../user/entities/user.entity';
 
-@WebSocketGateway(3002, {namespace: 'chat'})
+@WebSocketGateway(3002)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private readonly chatService: ChatService,
@@ -42,25 +42,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() io: Server;
     private readonly logger = new Logger('CHAT');
 
-    // @SubscribeMessage('join-room')
-    // async joinRoom(@MessageBody() joinDto: WSJoinDto, @ConnectedSocket() client: Socket) {
-    //     this.logger.log(
-    //         `room-joined`
-    //     );
-    //     // // add user to room in database
-    //     // const user = await this.chatService.joinRoom(joinDto);
+    @SubscribeMessage('join-room')
+    async joinRoom(@MessageBody() joinDto: WSJoinDto, @ConnectedSocket() client: Socket) {
+        this.logger.log(
+            `room-joined`
+        );
+        // // add user to room in database
+        // const user = await this.chatService.joinRoom(joinDto);
 
-    //     // add user to room in socket
-    //     client.join(joinDto.roomUid);
+        // add user to room in socket
+        client.join(joinDto.roomUid);
 
-    //     this.io
-    //         .to(joinDto.roomUid)
-    //         .emit('joined', { newUser: joinDto.userUid });
-    //     this.logger.log(
-    //         `User ${joinDto.userUid} joined room ${joinDto.roomUid}`
-    //     );
-    //     console.log(`Rooms: `, client.rooms);
-    // }
+        this.io
+            .to(joinDto.roomUid)
+            .emit('joined', { newUser: joinDto.userUid });
+        this.logger.log(
+            `User ${joinDto.userUid} joined room ${joinDto.roomUid}`
+        );
+        console.log(`Rooms: `, client.rooms);
+    }
 
     @SubscribeMessage('createRoom')
     public async onCreateRoom(@MessageBody() createdRoom: RoomEntity){
