@@ -42,25 +42,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() io: Server;
     private readonly logger = new Logger('CHAT');
 
-    @SubscribeMessage('join-room')
-    async joinRoom(@MessageBody() joinDto: WSJoinDto, @ConnectedSocket() client: Socket) {
-        this.logger.log(
-            `room-joined`
-        );
-        // // add user to room in database
-        // const user = await this.chatService.joinRoom(joinDto);
+    // @SubscribeMessage('join-room')
+    // async joinRoom(@MessageBody() joinDto: WSJoinDto, @ConnectedSocket() client: Socket) {
+    //     this.logger.log(
+    //         `room-joined`
+    //     );
+    //     // // add user to room in database
+    //     // const user = await this.chatService.joinRoom(joinDto);
 
-        // add user to room in socket
-        client.join(joinDto.roomUid);
+    //     // add user to room in socket
+    //     client.join(joinDto.roomUid);
 
-        this.io
-            .to(joinDto.roomUid)
-            .emit('joined', { newUser: joinDto.userUid });
-        this.logger.log(
-            `User ${joinDto.userUid} joined room ${joinDto.roomUid}`
-        );
-        console.log(`Rooms: `, client.rooms);
-    }
+    //     this.io
+    //         .to(joinDto.roomUid)
+    //         .emit('joined', { newUser: joinDto.userUid });
+    //     this.logger.log(
+    //         `User ${joinDto.userUid} joined room ${joinDto.roomUid}`
+    //     );
+    //     console.log(`Rooms: `, client.rooms);
+    // }
 
     @SubscribeMessage('createRoom')
     public async onCreateRoom(@MessageBody() createdRoom: RoomEntity){
@@ -110,7 +110,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     socketId: client.id,
                     user_uuid: user.uuid
                 })
-                
+                user.chats.forEach(chat => {
+                    client.join(chat.uuid)
+                })
+                // client.join(user.chats[0].uuid);
+
             }
         }
         catch (error) {
