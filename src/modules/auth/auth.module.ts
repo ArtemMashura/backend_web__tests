@@ -15,7 +15,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         TokenModule, 
         TypeOrmModule.forFeature([UserEntity]),
         EventEmitterModule.forRoot({
-            maxListeners: 1
+            maxListeners: 10
         })
     ],
     controllers: [AuthController],
