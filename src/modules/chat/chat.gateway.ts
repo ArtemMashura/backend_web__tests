@@ -26,7 +26,7 @@ import { RoomEntity } from './entities/room.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { UserEntity } from '../user/entities/user.entity';
 
-@WebSocketGateway(3002)
+@WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private readonly chatService: ChatService,
@@ -96,8 +96,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(data);
     }
 
-    // @SubscribeMessage('onSuccesfulLogin')
-    @OnEvent('onSuccesfulLogin')
+    // @OnEvent('onSuccesfulLogin')
+    @SubscribeMessage('onSuccesfulLogin')
     async hanConn(@MessageBody() user: UserEntity, @ConnectedSocket() client: Socket) {
         try {
             this.logger.log("onSuccesfulLogin triggered")
@@ -110,9 +110,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     socketId: client.id,
                     user_uuid: user.uuid
                 })
-                user.chats.forEach(chat => {
-                    client.join(chat.uuid)
-                })
+                // user.chats.forEach(chat => {
+                //     client.join(chat.uuid)
+                // })
                 // client.join(user.chats[0].uuid);
 
             }
@@ -126,7 +126,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     async handleConnection(@ConnectedSocket() client: Socket) {
         this.logger.log(
-            `Client ${client.id} connected! Total connections: ${this.io.sockets}!`
+            `Client ${client.id} connected! Total connections: ${this.io.sockets.sockets.size}!`
         );
             
         

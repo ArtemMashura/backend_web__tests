@@ -66,7 +66,6 @@ export class ChatService {
         });
 
         var files_urls = await Promise.all(files_urls_promises)
-        console.log(files_urls)
 
         const message = await this.messageRepository.save({
             ...newMessage,

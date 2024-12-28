@@ -58,7 +58,6 @@ export class ChatController {
     async newMessage(@UploadedFiles() files: Express.Multer.File[], @Req() req: Request, @Body() newMessage: WSNewMessageDto) {
         const token = req.headers.authorization.split(' ')[1];
         const user = this.tokenService.verifyToken(token, 'access');
-        console.log(files)
         const message = await this.chatService.createMessage(newMessage, user.uuid, files);
 
         this.chatGateway.sendMessage(message);
