@@ -7,6 +7,7 @@ import { WSNewMessageDto } from './dto/create-message.dto';
 import { ChatGateway } from './chat.gateway';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { retry } from 'rxjs';
+import { ChangeRoomNameDto } from './dto/change-room-name.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -87,5 +88,63 @@ export class ChatController {
         const user = this.tokenService.verifyToken(token, 'access');
 
         return this.chatService.deleteRoom(roomUId, user.uuid);
+    }
+
+    @Patch('change-name/:room_uid')
+    @HttpCode(200)
+    async changeName(@Req() req: Request, @Param('room_uid') roomUId: string, @Body() changeNameDto: ChangeRoomNameDto) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        const newName = await this.chatService.changeRoomName(roomUId, changeNameDto.newName, user.uuid);
+        this.chatGateway.chatNameChange(newName.roomNewName, roomUId);
+
+        return newName
+    }
+
+    @Patch('change-avatar/:room_uid')
+    @HttpCode(200)
+    @UseInterceptors(FileInterceptor('file'))
+    async changeAvatar(@Req() req: Request, @Param('room_uid') roomUId: string, @UploadedFile(                   
+        new ParseFilePipe({
+            validators: [
+                // new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
+                new FileTypeValidator({fileType: /(jpg|jpeg|png)$/})
+            ],
+            fileIsRequired: true
+        })
+    ) file: Express.Multer.File) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        
+
+        const newAvatar = await this.chatService.changeAvatar(file, roomUId);
+        this.chatGateway.chatAvatarChange(newAvatar.new_logo_url, roomUId);
+
+        return newAvatar
+    }
+
+    @Patch('change-background/:room_uid')
+    @HttpCode(200)
+    @UseInterceptors(FileInterceptor('file'))
+    async changeBackground(@Req() req: Request, @Param('room_uid') roomUId: string, @UploadedFile(                   
+        new ParseFilePipe({
+            validators: [
+                // new MaxFileSizeValidator({ maxSize: 2 * 1000 * 1000 }),
+                new FileTypeValidator({fileType: /(jpg|jpeg|png)$/})
+            ],
+            fileIsRequired: true
+        })
+    ) file: Express.Multer.File) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        
+
+        const newBackground = await this.chatService.changeBackground(file, roomUId);
+        this.chatGateway.chatBackgroundChange(newBackground.new_background_url, roomUId);
+
+        return newBackground
     }
 }

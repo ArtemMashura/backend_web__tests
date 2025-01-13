@@ -25,7 +25,7 @@ export class ChatService {
         @InjectRepository(FileEntity)
         private fileRepository: Repository<FileEntity>,
         private readonly userService: UserService,
-        private readonly fileUploadService: FilesUploadS3Service,
+        private readonly filesUploadS3Service: FilesUploadS3Service,
         private eventEmitter: EventEmitter2
     ) {}
 
@@ -58,7 +58,7 @@ export class ChatService {
 
         var files_urls_promises = []
         files.forEach(file => {
-            files_urls_promises.push(this.fileUploadService.uploadFile(
+            files_urls_promises.push(this.filesUploadS3Service.uploadFile(
                 `${userUuid}/${v4()}.${file.mimetype.split('/')[1]}`,
                 file.buffer,
                 file.mimetype
@@ -108,7 +108,7 @@ export class ChatService {
         });
         const users: Array<UserEntity> = await Promise.all(usersPromises);
         if (file) {
-            var file_url = await this.fileUploadService.uploadFile(
+            var file_url = await this.filesUploadS3Service.uploadFile(
                 `${ownerUid}/${v4()}.${file.mimetype.split('/')[1]}`,
                 file.buffer,
                 file.mimetype
@@ -290,10 +290,79 @@ export class ChatService {
         return messages
     }
 
+    async changeRoomName(roomUId: string, newName: string, userUuid: string) {
+        // const room = await this.roomRepository.createQueryBuilder("room")
+        //     .leftJoinAndSelect("room.users", "user")
+        //     .where("room.uuid = :roomUId", {roomUId: roomUId})
+        //     .getOne()
+        
+        const room = await this.roomRepository.findOneOrFail({
+            where: {uuid: roomUId },
+            relations: ['users', 'owner'],
+        });
+
+        if (!room)   throw new HttpException('Chat not found', HttpStatus.NOT_FOUND);
+        const user = await this.userService.findOneByUid(userUuid);
+
+        const isUserInRoom = room.users.some((u) => u.uuid === user.uuid);
+        if (!isUserInRoom)   throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+        room.name = newName
+        this.roomRepository.save(room);
+        return {
+            roomNewName: newName
+        }
+    }
+
+    async changeAvatar(file: Express.Multer.File, roomUId: string) {
+        if (!file){
+            throw new BadRequestException('No new profile picture provided'); 
+        }
+        const room = await this.roomRepository.findOne({
+            where: {
+                uuid: roomUId
+            }
+        })
+        if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
     
+        var logo_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       
+            `${room.name}/${v4()}.${file.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
+            file.buffer,
+            file.mimetype
+        );
+    
+        room.logo_url = logo_url
 
-    // async newMessage(newMessage: CreateMessageDto, userUuid: string) {
-    //     const fromUser = await this.userService.findOneByUid(userUuid);
+        await this.roomRepository.save(room);
 
-    // }
+        return {
+            new_logo_url: logo_url
+        }
+    }
+
+    async changeBackground(file: Express.Multer.File, roomUId: string) {
+        if (!file){
+            throw new BadRequestException('No new profile picture provided'); 
+        }
+        const room = await this.roomRepository.findOne({
+            where: {
+                uuid: roomUId
+            }
+        })
+        if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
+    
+        var background_url = await this.filesUploadS3Service.uploadProfilePhoto(                                       
+            `${room.name}/${v4()}.${file.mimetype.split('/')[1]}`, // Xepobopa/jasl3-vfk3a-fafo4-opiq3.png
+            file.buffer,
+            file.mimetype
+        );
+    
+        room.background_url = background_url
+
+        await this.roomRepository.save(room);
+
+        return {
+            new_background_url: background_url
+        }
+    }
 }

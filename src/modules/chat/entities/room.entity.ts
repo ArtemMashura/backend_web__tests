@@ -23,4 +23,7 @@ export class RoomEntity extends AbstractEntity {
 
     @Column({nullable: true})
     logo_url?: string;
+
+    @Column({nullable: true})
+    background_url?: string;
 }

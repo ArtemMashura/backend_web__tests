@@ -149,4 +149,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`Message => ${message}`)
         const result = this.io.to(message.toRoomUid).emit('message', message);
     }
+
+    chatNameChange(newName: string, roomUUID: string) {
+        const result = this.io.to(roomUUID).emit('newChatName', newName);
+    }
+
+    chatAvatarChange(newAvatar: string, roomUUID: string) {
+        const result = this.io.to(roomUUID).emit('newAvatar', newAvatar);
+    }
+
+    chatBackgroundChange(newBackground: string, roomUUID: string) {
+        const result = this.io.to(roomUUID).emit('newBackground', newBackground);
+    }
 }
