@@ -26,6 +26,14 @@ export class ConnectedUserService {
         });
     }
 
+    async findBySocketID(socketID: string): Promise<ConnectedUserI[]> {
+        return this.connectedUserRepository.find({
+            where: {
+                socketId: socketID
+            }
+        });
+    }
+
     async findByAll(): Promise<ConnectedUserI[]> {
         return this.connectedUserRepository.find();
     }

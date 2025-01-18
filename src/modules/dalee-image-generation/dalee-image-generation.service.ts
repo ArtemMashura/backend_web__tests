@@ -20,9 +20,12 @@ export class DaleeImageGenerationService {
     ) {}
 
     async createImage(dto: daleeImageGenerationDto, uuid: string) {
-        if (dto.prompt === "") return
+        console.log(dto.prompt)
+        if (dto.prompt === "") {
+            console.log("No prompt detected")
+            return
+        }
         try {
-
             const response = await openai.images.generate({
                 model: "dall-e-2",
                 prompt: dto.prompt,
@@ -30,74 +33,14 @@ export class DaleeImageGenerationService {
                 quality: "standard",
                 n: 1,
             })
+            console.log(response.data[0])
             return {
                 image: response.data[0]
             }
-        // const messagesFromDB = await this.openAIChatMessageRepository.createQueryBuilder('room')
-        //     .leftJoinAndSelect('room.chatWith', 'user')
-        //     .where('user.uuid = :uuid', { uuid: uuid })
-        //     .getMany();
-    //     console.log(1111111111)
-    //     const user = await this.userRepository.findOne({
-    //         where: {
-    //             uuid: uuid
-    //         }
-    //     })
-    //     console.log(2222222222)
-    //     const requestMessages= [...dto.messages, dto.newMessage]
-
-    //     console.log(requestMessages)
-    //     console.log(3333333333)
-    //     const userMessage = await this.openAIChatMessageRepository.save({
-    //         ...dto.newMessage as DeepPartial<OpenAIChatMessageEntity>,
-    //         date: new Date(),
-    //         chatWith: user
-    //     })
-
-    //     const completion = await openai.chat.completions.create({
-    //         model: "gpt-4o-mini",
-    //         messages: requestMessages // as ChatCompletionMessageParam[]
-    //     });
-
-
-    //     const chatGptResponseMessage = await this.openAIChatMessageRepository.save({
-    //         ...completion.choices[0].message,
-    //         date: new Date(),
-    //         chatWith: user
-    //     })
-    
-    //    return {
-    //         userMessage: userMessage,
-    //         chatGptResponseMessage: chatGptResponseMessage
-    //    }
-    }
-        catch (err){
+        }
+        catch (err) {
             console.log(err)
         }
     }
 
-    // async findByUid(uuid: string) {
-    //     return await this.openAIChatMessageRepository.createQueryBuilder('room')
-    //         .leftJoin('room.chatWith', 'user')
-    //         .where('user.uuid = :uuid', { uuid: uuid })
-    //         .getMany();
-    // }
-
-    // async clearHistory(uuid: string) {
-    //     const user = await this.userRepository.findOne({
-    //         where: {
-    //             uuid: uuid
-    //         }
-    //     })
-    //     return await this.openAIChatMessageRepository.delete({
-    //         chatWith: user
-    //     })
-    
-    //     // return await this.openAIChatMessageRepository.createQueryBuilder('room')
-    //     //     .leftJoinAndSelect('room.chatWith', 'user')
-    //     //     .delete()
-    //     //     .from("room")
-    //     //     .where('user.uuid = :uuid', { uuid: uuid })
-    //     //     .execute()
-    // }
 }

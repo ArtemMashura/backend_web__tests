@@ -3,6 +3,7 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 import { RoomEntity } from 'src/modules/chat/entities/room.entity';
 import { DirectMessageRoomEntity } from 'src/modules/direct-message/entities/direct-message-room.entity';
 import { OpenAIChatMessageEntity } from 'src/modules/openAIchat/entities/openAI-message.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class UserEntity extends AbstractEntity {
@@ -35,4 +36,8 @@ export class UserEntity extends AbstractEntity {
     @OneToMany(() => OpenAIChatMessageEntity, (room) => room.chatWith)
     @JoinTable()
     openAIChat: OpenAIChatMessageEntity[];
+
+    @Column({nullable: true})
+    @Exclude()
+    lastVisit?: Date
 }

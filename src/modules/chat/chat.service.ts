@@ -365,4 +365,27 @@ export class ChatService {
             new_background_url: background_url
         }
     }
+
+    async deleteMessages(messages: string[], roomUId: string) {
+        const room = await this.roomRepository.findOne({
+            where: {
+                uuid: roomUId
+            },
+            relations: ['messages']
+            
+        })
+        if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
+
+        console.log(room.messages.length)
+
+        room.messages = room.messages.filter(function(el) {
+            return !messages.includes(el.uuid);
+        });
+
+        console.log(room.messages.length)
+
+        this.roomRepository.save(room);
+
+        return 
+    }
 }

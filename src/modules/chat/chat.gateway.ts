@@ -25,10 +25,14 @@ import { ConnectedUserI } from '../connected-user/dto/connected-user-interface';
 import { RoomEntity } from './entities/room.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { UserEntity } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
+        @InjectRepository(UserEntity)
+        private userRepository: Repository<UserEntity>,
         private readonly chatService: ChatService,
         private readonly connectedUserService: ConnectedUserService,
         private readonly tokenService: TokenService,
@@ -138,11 +142,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
     async handleDisconnect(@ConnectedSocket() client: Socket) {
-        await this.connectedUserService.deleteBySocketId(client.id)
+        const connectedUser = await this.connectedUserService.findBySocketID(client.id)
+        this.connectedUserService.deleteBySocketId(client.id)
         this.logger.log(
             `Client ${client.id} disconnected! Total connections: ${this.io.sockets.sockets}!`
         );
         client.disconnect()
+
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    uuid: connectedUser[0].user_uuid
+                }
+            })
+    
+            console.log(user) 
+    
+            user.lastVisit = new Date
+    
+            this.userRepository.save(user);
+
+        }
+        catch {
+
+        }
+
     }
 
     sendMessage(message: AbstractMessage) {
@@ -160,5 +184,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     chatBackgroundChange(newBackground: string, roomUUID: string) {
         const result = this.io.to(roomUUID).emit('newBackground', newBackground);
+    }
+
+    messageDeletion(messagesDeleted: string[], roomUUID: string) {
+        console.log(`Messages deleted amount: ${messagesDeleted.length}`)
+        const result = this.io.to(roomUUID).emit('messageDeletion', messagesDeleted);
     }
 }

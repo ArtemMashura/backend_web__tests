@@ -8,6 +8,7 @@ import { ChatGateway } from './chat.gateway';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { retry } from 'rxjs';
 import { ChangeRoomNameDto } from './dto/change-room-name.dto';
+import { DeleteMessagesDto } from './dto/delete-messages.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -61,6 +62,7 @@ export class ChatController {
         const user = this.tokenService.verifyToken(token, 'access');
         const message = await this.chatService.createMessage(newMessage, user.uuid, files);
 
+        console.log(message)
         this.chatGateway.sendMessage(message);
 
         return message
@@ -146,5 +148,18 @@ export class ChatController {
         this.chatGateway.chatBackgroundChange(newBackground.new_background_url, roomUId);
 
         return newBackground
+    }
+
+    @Delete('delete-messages/:room_uid')
+    @HttpCode(204)
+    async deleteMessages(@Req() req: Request, @Param('room_uid') roomUId: string, @Body() deleteMessagesDto: DeleteMessagesDto) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        this.chatService.deleteMessages(deleteMessagesDto.messagesUUIDArray, roomUId);
+
+        this.chatGateway.messageDeletion(deleteMessagesDto.messagesUUIDArray, roomUId);
+
+        return
     }
 }
