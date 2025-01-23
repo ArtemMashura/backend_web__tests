@@ -239,6 +239,8 @@ export class ChatService {
         // console.log(query)
 
         room.users = []
+        room.messages = []
+
         await this.roomRepository.save(room);
 
         // const messages1 = await this.messageRepository.find({

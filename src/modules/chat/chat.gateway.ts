@@ -158,7 +158,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
             console.log(user) 
     
-            user.lastVisit = new Date
+            user.lastVisit = new Date()
     
             this.userRepository.save(user);
 
