@@ -190,4 +190,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Messages deleted amount: ${messagesDeleted.length}`)
         const result = this.io.to(roomUUID).emit('messageDeletion', messagesDeleted);
     }
+
+    allMessagesDeleted(roomUUID: string) {
+        const result = this.io.to(roomUUID).emit('allMessagesDeleted');
+    }
 }

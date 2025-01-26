@@ -162,4 +162,13 @@ export class ChatController {
 
         return
     }
+
+    @Delete('delete-all-messages/:room_uid')
+    @HttpCode(204)
+    async deleteAllMessages(@Req() req: Request, @Param('room_uid') roomUId: string) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        return this.chatService.deleteAllMessages(roomUId);
+    }
 }

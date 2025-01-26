@@ -390,4 +390,19 @@ export class ChatService {
 
         return 
     }
+
+    async deleteAllMessages(roomUId: string) {
+        const room = await this.roomRepository.findOne({
+            where: {uuid: roomUId },
+            relations: ['messages'],
+        });
+        
+        if (!room)   throw new HttpException('Chat not found', HttpStatus.NOT_FOUND);
+
+        room.messages = []
+
+        await this.roomRepository.save(room);
+
+        return;
+    }
 }
