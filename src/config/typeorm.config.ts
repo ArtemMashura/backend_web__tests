@@ -17,6 +17,10 @@ export const dataSourceOptions: DataSourceOptions = {
     entities: [__dirname + '/../**/*.entity.{js.ts}'], // entities: [join(__dirname, '**', '*.entity.{ts,js}')],  
     migrations: ['dist/db/migrations/*js'],
     logging: true,
+    ssl: {
+        rejectUnauthorized: false,
+        ca: process.env.DB_SSL,
+    }
 };
 
 export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
@@ -35,8 +39,14 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
             entities: [__dirname + '/../**/*.entity.{js.ts}'], // entities: [join(__dirname, '**', '*.entity.{ts,js}')],  
             autoLoadEntities: true,
             migrations: ['dist/db/migrations/*js'],
+            
             // logging: true,
-            synchronize: true
+            synchronize: true,
+            ssl: {
+                rejectUnauthorized: false,
+                ca: process.env.DB_SSL,
+            },
+            
         };
     },
 };
