@@ -405,4 +405,41 @@ export class ChatService {
 
         return;
     }
+
+    async addUsersToTheRoom(users: string[], roomUId: string) {
+        const room = await this.roomRepository.findOne({
+            where: {
+                uuid: roomUId
+            }
+        })
+        if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
+    
+        const usersPromises = users.map((userUid) => {
+            return this.userService.findOneByUid(userUid);
+        });
+        const newUsers: Array<UserEntity> = await Promise.all(usersPromises);
+        room.users = [...room.users, ...newUsers]
+        await this.roomRepository.save(room);
+
+        return {
+            newUsers: newUsers
+        }
+    }
+
+    async deleteUserFromTheRoom(userUUID: string, roomUId: string) {
+        const room = await this.roomRepository.findOne({
+            where: {
+                uuid: roomUId
+            }
+        })
+        if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
+    
+        // const userToDelete = await this.userService.findOneByUid(userUid);
+
+        room.users = room.users.filter((user) => user.uuid !== userUUID);
+        
+        await this.roomRepository.save(room);
+
+        return
+    }
 }

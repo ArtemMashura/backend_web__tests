@@ -194,4 +194,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     allMessagesDeleted(roomUUID: string) {
         const result = this.io.to(roomUUID).emit('allMessagesDeleted');
     }
+
+    usersAdded(newUsers: UserEntity[], roomUUID: string) {
+        const result = this.io.to(roomUUID).emit('usersAdded', newUsers);
+    }
+
+    userDeletion(deletedUser: string, roomUUID: string) {
+        const result = this.io.to(roomUUID).emit('userDeletion', deletedUser);
+    }
 }

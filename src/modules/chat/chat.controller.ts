@@ -9,6 +9,8 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { retry } from 'rxjs';
 import { ChangeRoomNameDto } from './dto/change-room-name.dto';
 import { DeleteMessagesDto } from './dto/delete-messages.dto';
+import { AddUsersDto } from './dto/add-users.dto';
+import { DeleteUserDto } from './dto/remove-user.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -170,5 +172,31 @@ export class ChatController {
         const user = this.tokenService.verifyToken(token, 'access');
 
         return this.chatService.deleteAllMessages(roomUId);
+    }
+
+    @Patch('add-users/:room_uid')
+    @HttpCode(201)
+    async addUsersToTheRoom(@Req() req: Request, @Param('room_uid') roomUId: string, @Body() addUsersDto: AddUsersDto) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        const newUsers = await this.chatService.addUsersToTheRoom(addUsersDto.users, roomUId);
+
+        this.chatGateway.usersAdded(newUsers.newUsers, roomUId);
+
+        return newUsers
+    }
+
+    @Delete('remove-user/:room_uid')
+    @HttpCode(204)
+    async removeUserFromTheRoom(@Req() req: Request, @Param('room_uid') roomUId: string, @Body() deleteUserDto: DeleteUserDto) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        await this.chatService.deleteUserFromTheRoom(deleteUserDto.user, roomUId);
+
+        this.chatGateway.userDeletion(deleteUserDto.user, roomUId);
+
+        return
     }
 }
