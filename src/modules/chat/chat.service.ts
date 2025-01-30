@@ -409,8 +409,9 @@ export class ChatService {
     async addUsersToTheRoom(users: string[], roomUId: string) {
         const room = await this.roomRepository.findOne({
             where: {
-                uuid: roomUId
-            }
+                uuid: roomUId,
+            },
+            relations: ['users']
         })
         if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
     
@@ -430,7 +431,8 @@ export class ChatService {
         const room = await this.roomRepository.findOne({
             where: {
                 uuid: roomUId
-            }
+            },
+            relations: ['users']
         })
         if (!room)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
     
