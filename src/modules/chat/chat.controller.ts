@@ -187,7 +187,7 @@ export class ChatController {
         return newUsers
     }
 
-    @Delete('remove-user/:room_uid')
+    @Patch('remove-user/:room_uid')
     @HttpCode(204)
     async removeUserFromTheRoom(@Req() req: Request, @Param('room_uid') roomUId: string, @Body() deleteUserDto: DeleteUserDto) {
         const token = req.headers.authorization.split(' ')[1];
