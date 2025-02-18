@@ -444,4 +444,25 @@ export class ChatService {
 
         return
     }
+
+    async editMessage(userUUID: string, message_uid: string, newMessageText: string) {
+        const message = await this.messageRepository.findOne({
+            where: {
+                uuid: message_uid
+            },
+            relations: ['from', 'to']
+        })
+        if (!message)   throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
+
+        if (message.from.uuid !== userUUID)  throw new HttpException("Message doesn't belong to the user", HttpStatus.FORBIDDEN);
+
+        message.message = newMessageText
+        
+        await this.messageRepository.save(message);
+
+        return {
+            roomUUID: message.to.uuid,
+            newMessageText: newMessageText
+        }
+    }
 }

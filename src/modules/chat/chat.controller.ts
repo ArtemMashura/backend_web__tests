@@ -11,6 +11,7 @@ import { ChangeRoomNameDto } from './dto/change-room-name.dto';
 import { DeleteMessagesDto } from './dto/delete-messages.dto';
 import { AddUsersDto } from './dto/add-users.dto';
 import { DeleteUserDto } from './dto/remove-user.dto';
+import { EditMessageDto } from './dto/edit-message.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -198,5 +199,18 @@ export class ChatController {
         this.chatGateway.userDeletion(deleteUserDto.user, roomUId);
 
         return
+    }
+
+    @Patch('edit-message/:message_uid')
+    @HttpCode(201)
+    async editMessage(@Req() req: Request, @Param('message_uid') message_uid: string, @Body() editMessageDto: EditMessageDto) {
+        const token = req.headers.authorization.split(' ')[1];
+        const user = this.tokenService.verifyToken(token, 'access');
+
+        const editedMessage = await this.chatService.editMessage(user.uuid, message_uid, editMessageDto.newMessageText);
+
+        this.chatGateway.messageWasEdited(editedMessage.roomUUID, editedMessage.newMessageText, message_uid);
+
+        return editedMessage
     }
 }
