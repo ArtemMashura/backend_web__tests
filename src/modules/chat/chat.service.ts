@@ -457,6 +457,7 @@ export class ChatService {
         if (message.from.uuid !== userUUID)  throw new HttpException("Message doesn't belong to the user", HttpStatus.FORBIDDEN);
 
         message.message = newMessageText
+        message.wasEdited = true
         
         await this.messageRepository.save(message);
 

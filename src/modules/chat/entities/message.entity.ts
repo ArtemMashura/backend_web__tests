@@ -24,4 +24,7 @@ export class MessageEntity extends AbstractEntity {
 
     @ManyToOne(() => DirectMessageRoomEntity, (room) => room.messages, {nullable : true, cascade: true, onDelete: "SET NULL"})
     toDirectMessageRoom?: DirectMessageRoomEntity;
+
+    @Column({nullable: true})
+    wasEdited?: boolean
 }
