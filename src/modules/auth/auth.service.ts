@@ -50,15 +50,15 @@ export class AuthService {
         }
         const user = await this.userRepository.createQueryBuilder("user")
             .where("user.nickname = :nickname", { nickname: newUserInfo.nickname })
-            .orWhere("user.email = :email", { email: newUserInfo.email })
+            // .orWhere("user.email = :email", { email: newUserInfo.email })
             .orWhere("user.phone = :phone", { phone: newUserInfo.phone })
             .getOne()
         if (user) {
             var message;
             if (user.nickname === newUserInfo.nickname)
                 message = "User with such nickname already exists"
-            else if (user.email === newUserInfo.email)
-                message = "User with such email already exists"
+            // else if (user.email === newUserInfo.email)
+            //     message = "User with such email already exists"
             else if (user.phone === newUserInfo.phone)
                 message = "User with such phone number already exists"
             else message = "Unknown error"
@@ -82,6 +82,8 @@ export class AuthService {
 
     async login(login: LoginDto):Promise<Array<object>> {
         const user = await this.userService.findOneByNickname(login.nickname);
+
+        console.log(user)
 
         if (!(await bcrypt.compare(login.password, user.password))) {
             throw new HttpException(
@@ -131,6 +133,7 @@ export class AuthService {
     async updateRtHash(userId: number, rt: string): Promise<void> {
         const hash = await argon.hash(rt);
 
+        console.log(hash)
 
         this.userRepository.update(userId, {
             hashedRt: hash

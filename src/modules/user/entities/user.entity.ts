@@ -10,11 +10,11 @@ export class UserEntity extends AbstractEntity {
     @Column({ unique: true })
     nickname: string;
 
-    @Column({ unique: true })
+    @Column({ unique: true, select: false })
     password: string;
 
-    @Column({ unique: true })
-    email: string;
+    @Column({ nullable: true, unique: true })
+    email?: string;
     
     @Column({ unique: true })
     phone: string;
@@ -30,7 +30,7 @@ export class UserEntity extends AbstractEntity {
     @JoinTable()
     directMessageRooms: DirectMessageRoomEntity[];
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, select: false })
     hashedRt?: string;
 
     @OneToMany(() => OpenAIChatMessageEntity, (room) => room.chatWith)

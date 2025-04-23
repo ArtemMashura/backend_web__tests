@@ -38,6 +38,18 @@ export class UserService {
         try {
             return await this.userRepository.findOneOrFail({
                 where: { nickname },
+                select: {
+                    id: true,
+                    uuid: true,
+                    password: true,
+                    created_at: true,
+                    updated_at: true,
+                    nickname: true,
+                    phone: true,
+                    profile_url: true,
+                    hashedRt: true,
+                    lastVisit: true
+                }
             });
         } catch (e) {
             throw new BadRequestException('User not found');
@@ -76,6 +88,7 @@ export class UserService {
 
         var rooms = await this.roomRepository.createQueryBuilder('room')
             .leftJoinAndSelect('room.messages', 'messages')
+            .leftJoinAndSelect('messages.from', 'from')
             .leftJoinAndSelect('room.users', 'users')
             .leftJoinAndSelect('room.owner', 'owner')
             .where('users.uuid = :uuid', { uuid: uuid })

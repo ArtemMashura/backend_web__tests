@@ -4,9 +4,9 @@ export class UserDto {
     @IsString()
     nickname: string;
 
-    @IsString()
-    @IsEmail()
-    email: string;
+    // @IsString()
+    // @IsEmail()
+    // email?: string;
 
     @IsString()
     @IsPhoneNumber('UA')
