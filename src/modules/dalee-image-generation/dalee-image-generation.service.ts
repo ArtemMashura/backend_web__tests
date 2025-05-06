@@ -30,7 +30,7 @@ export class DaleeImageGenerationService {
                 model: "dall-e-2",
                 prompt: dto.prompt,
                 size: "256x256",
-                quality: "standard",
+                // quality: "standard",
                 n: 1,
             })
             console.log(response.data[0])
